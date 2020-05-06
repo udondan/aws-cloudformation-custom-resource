@@ -1,9 +1,12 @@
 {
   "name": "aws-cloudformation-custom-resource",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Helper for managing custom AWS CloudFormation resources in a Lambda function",
-  "main": "index.js",
-  "scripts": {},
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublish": "tsc"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/udondan/aws-cloudformation-custom-resource.git"
@@ -27,7 +30,9 @@
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
   "devDependencies": {
     "@types/node": "^13.13.5",
+    "@types/aws-lambda": "^8.10.51",
     "aws-lambda": "^1.0.6",
     "aws-sdk": "^2.670.0"
-  }
+  },
+  "dependencies": {}
 }

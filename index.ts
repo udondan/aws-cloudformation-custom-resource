@@ -103,7 +103,7 @@ export class CustomResource {
             else if (this.event.RequestType == 'Delete') queue = this.deleteFunctions;
             else {
                 this.sendResponse('FAILED', `Unexpected request type: ${this.event.RequestType}`);
-                return;
+                return this;
             }
 
             let result = queue.reduce((current, next) => {
