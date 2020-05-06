@@ -5,9 +5,9 @@ Helper for managing custom AWS CloudFormation resources in a Lambda function.
 ## Usage
 
 ```typescript
+import { CustomResource, Event, StandardLogger } from 'aws-cloudformation-custom-resource';
 import { Callback, Context } from 'aws-lambda';
 import AWS = require('aws-sdk');
-import { CustomResource, Event } from './helper';
 
 export const handler = function (event: Event = {}, context: Context, callback: Callback) {
     new CustomResource(event, context, callback)
