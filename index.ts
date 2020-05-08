@@ -6,14 +6,25 @@ import URL = require('url');
 /**
  * The event passed to the Lambda handler
  */
-export interface Event {
+
+export interface LambdaEvent {
     [key: string]: any;
+}
+
+/**
+ * The event passed through the promises.
+ */
+export interface Event extends LambdaEvent {
+    /**
+     * Adds values to the response returned to CloudFormation
+     */
+    addResponseValue: (key: string, value: any) => void;
 }
 
 /**
  * Function signature
  */
-export type func = (input: any) => Promise<any>;
+export type func = (event: Event) => Promise<Event | AWS.AWSError>;
 
 /**
  * Custom CloudFormation resource helper
@@ -37,7 +48,7 @@ export class CustomResource {
     /**
      * The event passed to the Lambda handler
      */
-    event: Event;
+    event: LambdaEvent;
 
     /**
      * The context passed to the Lambda handler
@@ -50,12 +61,19 @@ export class CustomResource {
     callback: Callback;
 
     /**
+     * Stores values returned to CloudFormation
+     */
+    ResponseData: {
+        [key: string]: any;
+    } = {};
+
+    /**
      * Logger class
      */
     logger: Logger;
 
     constructor(
-        event: Event,
+        event: LambdaEvent,
         context: Context,
         callback: Callback,
         logger?: Logger
@@ -98,8 +116,13 @@ export class CustomResource {
     /**
      * Handles the Lambda event
      */
-    handle(input?: any): this {
-        const construct = this;
+    handle(event: LambdaEvent): this {
+        const self = this;
+
+        event.addResponseValue = (key: string, value: any) => {
+            self.ResponseData[key] = value;
+        };
+
         try {
             let queue: func[];
             if (this.event.RequestType == 'Create')
@@ -116,26 +139,29 @@ export class CustomResource {
                 return this;
             }
 
-            let result = queue.reduce((current, next) => {
-                return current.then((value: any) => {
-                    return next(value);
-                });
-            }, Promise.resolve(input));
+            let result = queue.reduce(
+                (current: Promise<Event | AWS.AWSError> | func, next: func) => {
+                    return (current as Promise<Event>).then((value: Event) => {
+                        return next(value);
+                    });
+                },
+                Promise.resolve(event as Event)
+            );
 
             result
-                .then(function (response) {
-                    construct.logger.debug(response);
-                    construct.sendResponse(
+                .then(function (event: Event | AWS.AWSError) {
+                    self.logger.debug(event);
+                    self.sendResponse(
                         'SUCCESS',
-                        `${construct.event.RequestType} completed successfully`
+                        `${self.event.RequestType} completed successfully`
                     );
                 })
                 .catch(function (err: AWS.AWSError) {
-                    construct.logger.error(err, err.stack);
-                    construct.sendResponse('FAILED', err.message || err.code);
+                    self.logger.error(err, err.stack);
+                    self.sendResponse('FAILED', err.message || err.code);
                 });
         } catch (err) {
-            construct.sendResponse('FAILED', err.message || err.code);
+            this.sendResponse('FAILED', err.message || err.code);
         }
         return this;
     }
@@ -144,12 +170,12 @@ export class CustomResource {
      * Sends CloudFormation response just before the Lambda times out
      */
     timeout() {
-        const construct = this;
+        const self = this;
         const handler = () => {
-            construct.logger.error('Timeout FAILURE!');
+            self.logger.error('Timeout FAILURE!');
             new Promise(() =>
-                construct.sendResponse('FAILED', 'Function timed out')
-            ).then(() => construct.callback(new Error('Function timed out')));
+                self.sendResponse('FAILED', 'Function timed out')
+            ).then(() => self.callback(new Error('Function timed out')));
         };
         setTimeout(handler, this.context.getRemainingTimeInMillis() - 1000);
     }
@@ -158,30 +184,30 @@ export class CustomResource {
      * Sends CloudFormation response
      */
     sendResponse(responseStatus: string, responseData: string) {
-        const construct = this;
-        construct.logger.debug(
+        const self = this;
+        this.logger.debug(
             `Sending response ${responseStatus}:\n${JSON.stringify(
                 responseData
             )}`
         );
 
-        var body = JSON.stringify({
+        const data = this.ResponseData;
+        data['Message'] = responseData;
+
+        const body = JSON.stringify({
             Status: responseStatus,
-            Reason: `${responseData} | Full error in CloudWatch ${construct.context.logStreamName}`,
-            PhysicalResourceId: construct.event.ResourceProperties.Name,
-            StackId: construct.event.StackId,
-            RequestId: construct.event.RequestId,
-            LogicalResourceId: construct.event.LogicalResourceId,
-            Data: {
-                Message: responseData,
-                Name: construct.event.ResourceProperties.Name,
-            },
+            Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
+            PhysicalResourceId: this.event.PhysicalResourceId,
+            StackId: this.event.StackId,
+            RequestId: this.event.RequestId,
+            LogicalResourceId: this.event.LogicalResourceId,
+            Data: data,
         });
 
-        construct.logger.debug('RESPONSE BODY:\n', body);
+        this.logger.debug('RESPONSE BODY:\n', body);
 
-        var url = URL.parse(construct.event.ResponseURL);
-        var options = {
+        const url = URL.parse(this.event.ResponseURL);
+        const options = {
             hostname: url.hostname,
             port: 443,
             path: url.path,
@@ -192,19 +218,17 @@ export class CustomResource {
             },
         };
 
-        construct.logger.info('SENDING RESPONSE...\n');
+        this.logger.info('SENDING RESPONSE...\n');
 
-        var request = https.request(options, function (response: any) {
-            construct.logger.debug(`STATUS: ${response.statusCode}`);
-            construct.logger.debug(
-                `HEADERS: ${JSON.stringify(response.headers)}`
-            );
-            construct.context.done();
+        const request = https.request(options, function (response: any) {
+            self.logger.debug(`STATUS: ${response.statusCode}`);
+            self.logger.debug(`HEADERS: ${JSON.stringify(response.headers)}`);
+            self.context.done();
         });
 
         request.on('error', function (error: Error) {
-            construct.logger.error(`sendResponse Error: ${error}`);
-            construct.context.done();
+            self.logger.error(`sendResponse Error: ${error}`);
+            self.context.done();
         });
 
         request.write(body);
