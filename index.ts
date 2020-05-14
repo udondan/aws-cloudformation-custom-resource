@@ -197,7 +197,7 @@ export class CustomResource {
         const body = JSON.stringify({
             Status: responseStatus,
             Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
-            PhysicalResourceId: this.event.PhysicalResourceId,
+            PhysicalResourceId: this.event.ResourceProperties.Name,
             StackId: this.event.StackId,
             RequestId: this.event.RequestId,
             LogicalResourceId: this.event.LogicalResourceId,
