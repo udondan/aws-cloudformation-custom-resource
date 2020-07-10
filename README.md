@@ -14,8 +14,8 @@ import { CustomResource, Event, StandardLogger } from 'aws-cloudformation-custom
 import { Callback, Context } from 'aws-lambda';
 import AWS = require('aws-sdk');
 
-export const handler = function (event: Event = {}, context: Context, callback: Callback) {
-    new CustomResource(event, context, callback)
+export const handler = function (event: Event, context: Context, callback: Callback) {
+    new CustomResource(context, callback)
         .onCreate(Create)
         .onUpdate(Update)
         .onDelete(Delete)

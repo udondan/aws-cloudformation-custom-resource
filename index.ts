@@ -19,6 +19,11 @@ export interface Event extends LambdaEvent {
    * Adds values to the response returned to CloudFormation
    */
   addResponseValue: (key: string, value: any) => void;
+
+  /**
+   * Set the physical ID of the resource
+   */
+  setPhysicalResourceId: (value: any) => void;
 }
 
 /**
@@ -46,11 +51,6 @@ export class CustomResource {
   deleteFunctions: func[] = [];
 
   /**
-   * The event passed to the Lambda handler
-   */
-  event: LambdaEvent;
-
-  /**
    * The context passed to the Lambda handler
    */
   context: Context;
@@ -68,25 +68,19 @@ export class CustomResource {
   } = {};
 
   /**
+   * Stores values physical ID of the resource
+   */
+  PhysicalResourceId?: string;
+
+  /**
    * Logger class
    */
   logger: Logger;
 
-  constructor(
-    event: LambdaEvent,
-    context: Context,
-    callback: Callback,
-    logger?: Logger
-  ) {
-    if (typeof event.ResponseURL === 'undefined') {
-      throw new Error('ResponseURL missing');
-    }
-    this.event = event;
+  constructor(context: Context, callback: Callback, logger?: Logger) {
     this.context = context;
     this.callback = callback;
     this.logger = logger || new StandardLogger();
-    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(event)}`);
-    this.timeout();
   }
 
   /**
@@ -117,21 +111,36 @@ export class CustomResource {
    * Handles the Lambda event
    */
   handle(event: LambdaEvent): this {
+    const lambdaEvent = event;
     const self = this;
+
+    if (typeof lambdaEvent.ResponseURL === 'undefined') {
+      throw new Error('ResponseURL missing');
+    }
+
+    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(lambdaEvent)}`);
+    this.timeout(lambdaEvent);
 
     event.addResponseValue = (key: string, value: any) => {
       self.ResponseData[key] = value;
     };
 
+    event.setPhysicalResourceId = (value: string) => {
+      self.PhysicalResourceId = value;
+    };
+
     try {
       let queue: func[];
-      if (this.event.RequestType == 'Create') queue = this.createFunctions;
-      else if (this.event.RequestType == 'Update') queue = this.updateFunctions;
-      else if (this.event.RequestType == 'Delete') queue = this.deleteFunctions;
+      if (lambdaEvent.RequestType == 'Create') queue = this.createFunctions;
+      else if (lambdaEvent.RequestType == 'Update')
+        queue = this.updateFunctions;
+      else if (lambdaEvent.RequestType == 'Delete')
+        queue = this.deleteFunctions;
       else {
         this.sendResponse(
+          lambdaEvent,
           'FAILED',
-          `Unexpected request type: ${this.event.RequestType}`
+          `Unexpected request type: ${lambdaEvent.RequestType}`
         );
         return this;
       }
@@ -149,16 +158,17 @@ export class CustomResource {
         .then(function (event: Event | AWS.AWSError) {
           self.logger.debug(event);
           self.sendResponse(
+            lambdaEvent,
             'SUCCESS',
-            `${self.event.RequestType} completed successfully`
+            `${lambdaEvent.RequestType} completed successfully`
           );
         })
         .catch(function (err: AWS.AWSError) {
           self.logger.error(err, err.stack);
-          self.sendResponse('FAILED', err.message || err.code);
+          self.sendResponse(lambdaEvent, 'FAILED', err.message || err.code);
         });
     } catch (err) {
-      this.sendResponse('FAILED', err.message || err.code);
+      this.sendResponse(lambdaEvent, 'FAILED', err.message || err.code);
     }
     return this;
   }
@@ -166,12 +176,12 @@ export class CustomResource {
   /**
    * Sends CloudFormation response just before the Lambda times out
    */
-  timeout() {
+  timeout(event: LambdaEvent) {
     const self = this;
     const handler = () => {
       self.logger.error('Timeout FAILURE!');
       new Promise(() =>
-        self.sendResponse('FAILED', 'Function timed out')
+        self.sendResponse(event, 'FAILED', 'Function timed out')
       ).then(() => self.callback(new Error('Function timed out')));
     };
     setTimeout(handler, this.context.getRemainingTimeInMillis() - 1000);
@@ -180,7 +190,11 @@ export class CustomResource {
   /**
    * Sends CloudFormation response
    */
-  sendResponse(responseStatus: string, responseData: string) {
+  sendResponse(
+    event: LambdaEvent,
+    responseStatus: string,
+    responseData: string
+  ) {
     const self = this;
     this.logger.debug(
       `Sending response ${responseStatus}:\n${JSON.stringify(responseData)}`
@@ -192,16 +206,17 @@ export class CustomResource {
     const body = JSON.stringify({
       Status: responseStatus,
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
-      PhysicalResourceId: this.event.ResourceProperties.Name,
-      StackId: this.event.StackId,
-      RequestId: this.event.RequestId,
-      LogicalResourceId: this.event.LogicalResourceId,
+      PhysicalResourceId:
+        self.PhysicalResourceId || event.ResourceProperties.Name,
+      StackId: event.StackId,
+      RequestId: event.RequestId,
+      LogicalResourceId: event.LogicalResourceId,
       Data: data,
     });
 
     this.logger.debug('RESPONSE BODY:\n', body);
 
-    const url = URL.parse(this.event.ResponseURL);
+    const url = URL.parse(event.ResponseURL);
     const options = {
       hostname: url.hostname,
       port: 443,
