@@ -51,6 +51,11 @@ export class CustomResource {
   event: LambdaEvent;
 
   /**
+   * The physical ID of the resource.
+   */
+  physicalResourceId: string;
+
+  /**
    * The context passed to the Lambda handler
    */
   context: Context;
@@ -76,12 +81,14 @@ export class CustomResource {
     event: LambdaEvent,
     context: Context,
     callback: Callback,
+    physicalResourceId: string,
     logger?: Logger
   ) {
     if (typeof event.ResponseURL === 'undefined') {
       throw new Error('ResponseURL missing');
     }
     this.event = event;
+    this.physicalResourceId = physicalResourceId;
     this.context = context;
     this.callback = callback;
     this.logger = logger || new StandardLogger();
@@ -192,7 +199,7 @@ export class CustomResource {
     const body = JSON.stringify({
       Status: responseStatus,
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
-      PhysicalResourceId: this.event.ResourceProperties.Name,
+      PhysicalResourceId: this.physicalResourceId,
       StackId: this.event.StackId,
       RequestId: this.event.RequestId,
       LogicalResourceId: this.event.LogicalResourceId,
