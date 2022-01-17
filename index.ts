@@ -207,7 +207,7 @@ export class CustomResource {
       Status: responseStatus,
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
-        self.PhysicalResourceId || event.ResourceProperties.Name,
+        self.PhysicalResourceId || event.PhysicalResourceId || event.ResourceProperties.Name,
       StackId: event.StackId,
       RequestId: event.RequestId,
       LogicalResourceId: event.LogicalResourceId,
