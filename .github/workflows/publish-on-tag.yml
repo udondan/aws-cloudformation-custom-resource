@@ -21,6 +21,14 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
       - run: npm version "${{ steps.get_version.outputs.VERSION }}" --allow-same-version --no-git-tag-version
+
+      - name: Commit version
+        run: |
+          git config --local user.email "${{ secrets.RELEASE_MAIL }}"
+          git config --local user.name "udondan"
+          git commit -am "Update package version"
+          git push
+
 #      - run: npm install
 #      - run: npm run prepublish
 #      - uses: JS-DevTools/npm-publish@v1
