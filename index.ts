@@ -167,7 +167,7 @@ export class CustomResource {
           self.logger.error(err, err.stack);
           self.sendResponse(lambdaEvent, 'FAILED', err.message || err.code);
         });
-    } catch (err) {
+    } catch (err: any) {
       this.sendResponse(lambdaEvent, 'FAILED', err.message || err.code);
     }
     return this;
@@ -207,7 +207,9 @@ export class CustomResource {
       Status: responseStatus,
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
-        self.PhysicalResourceId || event.PhysicalResourceId || event.ResourceProperties.Name,
+        self.PhysicalResourceId ||
+        event.PhysicalResourceId ||
+        event.ResourceProperties.Name,
       StackId: event.StackId,
       RequestId: event.RequestId,
       LogicalResourceId: event.LogicalResourceId,
