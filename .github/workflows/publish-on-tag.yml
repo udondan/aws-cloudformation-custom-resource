@@ -15,7 +15,6 @@ jobs:
         with:
           node-version: "14"
       - name: Set output
-        id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 #      - run: npm install
 #      - run: npm run prepublish
