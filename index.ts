@@ -1,5 +1,4 @@
 import { Callback, Context } from 'aws-lambda';
-import AWS = require('aws-sdk');
 import https = require('https');
 import URL = require('url');
 
@@ -29,7 +28,7 @@ export interface Event extends LambdaEvent {
 /**
  * Function signature
  */
-export type func = (event: Event) => Promise<Event | AWS.AWSError>;
+export type func = (event: Event) => Promise<Event | Error>;
 
 /**
  * Custom CloudFormation resource helper
@@ -146,7 +145,7 @@ export class CustomResource {
       }
 
       let result = queue.reduce(
-        (current: Promise<Event | AWS.AWSError> | func, next: func) => {
+        (current: Promise<Event | Error> | func, next: func) => {
           return (current as Promise<Event>).then((value: Event) => {
             return next(value);
           });
@@ -155,7 +154,7 @@ export class CustomResource {
       );
 
       result
-        .then(function (event: Event | AWS.AWSError) {
+        .then(function (event: Event | Error) {
           self.logger.debug(event);
           self.sendResponse(
             lambdaEvent,
@@ -163,7 +162,7 @@ export class CustomResource {
             `${lambdaEvent.RequestType} completed successfully`
           );
         })
-        .catch(function (err: AWS.AWSError) {
+        .catch(function (err: any) {
           self.logger.error(err, err.stack);
           self.sendResponse(lambdaEvent, 'FAILED', err.message || err.code);
         });

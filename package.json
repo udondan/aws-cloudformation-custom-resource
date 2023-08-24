@@ -29,10 +29,10 @@
   },
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
   "devDependencies": {
-    "@types/node": "^17.0.15",
-    "@types/aws-lambda": "^8.10.92",
+    "@types/node": "^20.5.4",
+    "@types/aws-lambda": "^8.10.119",
     "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1069.0"
+    "typescript": "^5.1.6"
   },
   "dependencies": {}
 }
