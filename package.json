@@ -20,8 +20,7 @@
   ],
   "author": {
     "name": "Daniel Schroeder",
-    "url": "https://www.udondan.com/",
-    "twitter": "udondan"
+    "url": "https://www.udondan.com/"
   },
   "license": "Apache-2.0",
   "bugs": {
@@ -29,10 +28,11 @@
   },
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
   "devDependencies": {
-    "@types/node": "^20.5.4",
-    "@types/aws-lambda": "^8.10.119",
-    "aws-lambda": "^1.0.7",
-    "typescript": "^5.1.6"
+    "@types/node": "^20.11.21",
+    "@types/aws-lambda": "^8.10.134",
+    "typescript": "^5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "aws-lambda": "1.0.7"
+  }
 }
