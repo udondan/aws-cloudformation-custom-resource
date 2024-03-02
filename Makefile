@@ -1,5 +1,6 @@
 SHELL := /bin/bash -euo pipefail
 VERSION := $(shell cat VERSION)
+.PHONY: test
 
 tag:
 	@git tag -a "v$(VERSION)" -m 'Creates tag "v$(VERSION)"'
