@@ -13,3 +13,4 @@ test/**/*
 Makefile
 VERSION
 .github
+.npm

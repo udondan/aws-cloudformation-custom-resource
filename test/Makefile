@@ -2,7 +2,7 @@ SHELL := /bin/bash -euo pipefail
 
 install:
 	@echo Installing dependencies...
-	@npm clean-install
+	@npm clean-install --prefer-offline --cache ../.npm
 
 build: install
 	@echo Building application...

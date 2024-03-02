@@ -4,3 +4,4 @@ test/cdk.out
 **/*.d.ts
 **/*.js
 *.tgz
+.npm
