@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublish": "tsc"
+    "build": "make build",
+    "prepublishOnly": "make build",
+    "prepack": "make build"
   },
   "repository": {
     "type": "git",
@@ -28,8 +30,11 @@
   },
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
   "devDependencies": {
-    "@types/node": "^20.11.21",
+    "@swc/core": "^1.4.2",
+    "@swc/helpers": "^0.5.6",
+    "@types/node": "^20.11.24",
     "@types/aws-lambda": "^8.10.134",
+    "regenerator-runtime": "^0.14.1",
     "typescript": "^5.3.3"
   },
   "dependencies": {
