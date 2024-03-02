@@ -28,14 +28,14 @@ jobs:
           fetch-depth: 0
 
       - name: Test package
-        run: make install test
+        run: make test
         env:
           AWS_REGION: us-east-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Test building package
-        run: npm pack
+        run: npm install build pack
 
       - name: Success # So we have final step we can explicitly wait for
         run: echo "Success"
