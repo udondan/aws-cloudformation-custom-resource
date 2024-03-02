@@ -31,9 +31,9 @@ build: install
 
 test:
 	@\
-	aws ssm get-parameter --name "TestResource1" &&\
-	cd test && \
-	$(MAKE) deploy && \
-	$(MAKE) deploy && \
-	aws ssm get-parameter --name "TestResource1" --query "Parameter.Value" --output text | grep "TestResource1" && \
+	aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text &&\
+	cd test &&\
+	$(MAKE) deploy &&\
+	$(MAKE) deploy &&\
+	aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text | grep "TestResource1" &&\
 	$(MAKE) DESTROY
