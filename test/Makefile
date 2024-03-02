@@ -8,14 +8,14 @@ build: install
 	@echo Building application...
 	@npm run build
 
-diff: build
+diff:
 	@echo Running diff...
 	@AWS_REGION=us-east-1 npm run cdk -- diff
 
-deploy: build
+deploy:
 	@echo Deploying application...
 	@AWS_REGION=us-east-1 npm run cdk -- deploy --require-approval never
 
-DESTROY: build
+DESTROY:
 	@echo Destroying application...
 	@AWS_REGION=us-east-1 npm run cdk -- destroy --force

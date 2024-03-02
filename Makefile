@@ -32,6 +32,7 @@ build: install
 test:
 	@\
 	cd test && \
+	$(MAKE) build && \
 	$(MAKE) deploy && \
 	$(MAKE) deploy && \
 	version=$$(aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text) && \
