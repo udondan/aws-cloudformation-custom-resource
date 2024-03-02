@@ -1,2 +1,6 @@
 node_modules
 dist
+test/cdk.out
+**/*.d.ts
+**/*.js
+*.tgz

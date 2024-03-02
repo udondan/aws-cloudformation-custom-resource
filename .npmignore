@@ -6,3 +6,10 @@ tsconfig.json
 # Include javascript files and typescript declarations
 !*.js
 !*.d.ts
+
+dist/test/**/*
+test/**/*
+*.tgz
+Makefile
+VERSION
+.github

@@ -1,0 +1,24 @@
+{
+  "name": "test",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "npx tsc",
+    "cdk": "npx cdk"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.134",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "20.11.24",
+    "aws-cdk": "2.131.0",
+    "aws-lambda": "1.0.7",
+    "esbuild": "0.20.1",
+    "ts-node": "10.9.2",
+    "typescript": "5.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.525.0",
+    "aws-cdk-lib": "2.131.0",
+    "aws-cloudformation-custom-resource": "file:..",
+    "constructs": "10.3.0"
+  }
+}

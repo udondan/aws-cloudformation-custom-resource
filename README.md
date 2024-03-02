@@ -9,42 +9,51 @@ Helper for managing custom AWS CloudFormation resources in a Lambda function.
 
 ## Usage
 
+You can find a complete example in the [test](test) directory.
+
+Basic usage:
+
 ```typescript
-import {
-  CustomResource,
-  Event,
-  StandardLogger,
-} from 'aws-cloudformation-custom-resource';
+import { CustomResource, Event } from 'aws-cloudformation-custom-resource';
 import { Callback, Context } from 'aws-lambda';
-import AWS = require('aws-sdk');
 
 export const handler = function (
   event: Event,
   context: Context,
-  callback: Callback
+  callback: Callback,
 ) {
   new CustomResource(context, callback)
-    .onCreate(Create)
-    .onUpdate(Update)
-    .onDelete(Delete)
+    .onCreate(createResource)
+    .onUpdate(updateResource)
+    .onDelete(deleteResource)
     .handle(event);
 };
 
-function Create(event: Event): Promise<Event | AWS.AWSError> {
+function createResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
+    // Every custom resource requires a physical ID.
+    // Either you can pass a `Name` parameter to the lambda function
+    // or you can manually set the ID:
+    event.setPhysicalResourceId('some-physical-resource-id');
+
+    // you can return values from the Lambda function:
+    event.addResponseValue('Foo', 'bar');
+
     // do stuff
     resolve(event);
   });
 }
 
-function Update(event: Event): Promise<Event | AWS.AWSError> {
+function updateResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
+    event.addResponseValue('Foo', 'bar');
+
     // do stuff
     resolve(event);
   });
 }
 
-function Delete(event: Event): Promise<Event | AWS.AWSError> {
+function deleteResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     // do stuff
     resolve(event);

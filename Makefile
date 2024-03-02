@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+SHELL := /bin/bash -euo pipefail
 VERSION := $(shell cat VERSION)
 
 tag:
@@ -18,3 +18,17 @@ push:
 	git push
 
 update: push re-release
+
+install:
+	@echo Installing library dependencies...
+	@npm i
+
+build: install
+	@echo Building library...
+	@rm -rf dist
+	@npx tsc
+
+test:
+	@\
+	cd test && \
+	$(MAKE) deploy DESTROY
