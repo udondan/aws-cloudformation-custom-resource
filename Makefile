@@ -31,6 +31,7 @@ build: install
 
 test:
 	@\
+	aws ssm get-parameter --name "TestResource1" &&\
 	cd test && \
 	$(MAKE) deploy && \
 	$(MAKE) deploy && \
