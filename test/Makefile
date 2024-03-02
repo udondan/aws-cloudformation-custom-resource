@@ -2,7 +2,7 @@ SHELL := /bin/bash -euo pipefail
 
 install:
 	@echo Installing dependencies...
-	@npm i
+	@npm clean-install
 
 build: install
 	@echo Building application...

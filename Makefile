@@ -22,7 +22,7 @@ update: push re-release
 
 install:
 	@echo Installing library dependencies...
-	@npm install
+	@npm clean-install
 
 build: install
 	@echo Building library...
