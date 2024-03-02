@@ -44,8 +44,9 @@ export class Stack extends CdkStack {
 
     const resourceProperties: LambdaProperties = {
       Name: 'TestResource1', // if set, this will be the physical resource ID
-      Value: 'someValue1',
+      Value: new Date().toISOString(), // for testing purpose, we always want to update the parameter
     };
+
     const queryProps: CustomResourceProps = {
       serviceToken: fn.functionArn,
       resourceType: 'Custom::Test-Resource',

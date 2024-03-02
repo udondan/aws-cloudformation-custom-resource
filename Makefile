@@ -32,4 +32,7 @@ build: install
 test:
 	@\
 	cd test && \
-	$(MAKE) deploy DESTROY
+	$(MAKE) deploy && \
+	$(MAKE) deploy && \
+	aws ssm get-parameter --name "TestResource1" --query "Parameter.Value" --output text | grep "TestResource1" && \
+	$(MAKE) DESTROY
