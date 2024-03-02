@@ -48,7 +48,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Test building package
-        run: npm install build pack
+        run: |
+          make install build
+          npm pack
 
       - name: Success # So we have final step we can explicitly wait for
         run: echo "Success"
