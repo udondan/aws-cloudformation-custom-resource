@@ -31,9 +31,13 @@ build: install
 
 test:
 	@\
-	aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text &&\
 	cd test &&\
 	$(MAKE) deploy &&\
 	$(MAKE) deploy &&\
-	aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text | grep "TestResource1" &&\
+	version=$$(aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text) &&\
+	if [ "$$version" -ne 2 ]; then \
+		echo "Error: Version is not 2." >&2; \
+		$(MAKE) DESTROY; \
+		exit 1; \
+	fi &&\
 	$(MAKE) DESTROY
