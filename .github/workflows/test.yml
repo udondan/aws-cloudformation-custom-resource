@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: Test package
-        run: make test
+        run: make build test
         env:
           AWS_REGION: us-east-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
