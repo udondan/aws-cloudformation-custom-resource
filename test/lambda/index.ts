@@ -1,5 +1,5 @@
 // This test implementation manages an SSM parameter identified by the given `Name` property and returns the `ParameterVersion` as a response value.
-// Of course this does not make much sense, but it is a simple test case and example of how to use the `aws-cloudformation-custom-resource` package to create a custom resource.
+// Of course this does not make much sense, but it is a simple test case suits as an example of how to use the `aws-cloudformation-custom-resource` package to create a custom resource.
 import {
   DeleteParameterCommand,
   DeleteParameterCommandInput,

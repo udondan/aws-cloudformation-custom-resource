@@ -12,7 +12,6 @@ import {
 import { Construct } from 'constructs';
 import path = require('path');
 
-//,
 export interface LambdaProperties {
   [key: string]: String;
 }
@@ -53,11 +52,7 @@ export class Stack extends CdkStack {
       properties: resourceProperties,
     };
 
-    const customResource = new CustomResource(
-      this,
-      'TestResource1',
-      queryProps,
-    );
+    const customResource = new CustomResource(this, 'TestResource1', queryProps);
 
     const parameterVersion = customResource.getAttString('ParameterVersion');
 
