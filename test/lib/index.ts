@@ -12,9 +12,7 @@ import {
 import { Construct } from 'constructs';
 import path = require('path');
 
-export interface LambdaProperties {
-  [key: string]: String;
-}
+export type LambdaProperties = Record<string, string>;
 
 export class Stack extends CdkStack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -22,6 +20,7 @@ export class Stack extends CdkStack {
 
     const stack = CdkStack.of(this);
     const lambdaName = `${stack.stackName}-Test`;
+    const resourceId = 'TestResource3';
 
     const fn = new aws_lambda_nodejs.NodejsFunction(this, lambdaName, {
       entry: path.join(__dirname, '../lambda/index.ts'),
@@ -36,13 +35,13 @@ export class Stack extends CdkStack {
       new aws_iam.PolicyStatement({
         actions: ['ssm:PutParameter', 'ssm:DeleteParameter'],
         resources: [
-          `arn:aws:ssm:${this.region}:${this.account}:parameter/TestResource1`,
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/${resourceId}`,
         ],
       }),
     );
 
     const resourceProperties: LambdaProperties = {
-      Name: 'TestResource1', // if set, this will be the physical resource ID
+      Name: resourceId, // if set, this will be the physical resource ID
       Value: new Date().toISOString(), // for testing purpose, we always want to update the parameter
     };
 
@@ -52,10 +51,9 @@ export class Stack extends CdkStack {
       properties: resourceProperties,
     };
 
-    const customResource = new CustomResource(this, 'TestResource1', queryProps);
+    const customResource = new CustomResource(this, resourceId, queryProps);
 
     const parameterVersion = customResource.getAttString('ParameterVersion');
-
     new CfnOutput(this, 'ParameterVersion', {
       value: parameterVersion,
     });

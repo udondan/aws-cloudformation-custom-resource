@@ -2,23 +2,32 @@
 // Of course this does not make much sense, but it is a simple test case suits as an example of how to use the `aws-cloudformation-custom-resource` package to create a custom resource.
 import {
   DeleteParameterCommand,
-  DeleteParameterCommandInput,
   PutParameterCommand,
-  PutParameterCommandInput,
   SSMClient,
 } from '@aws-sdk/client-ssm';
-import { CustomResource, Event } from 'aws-cloudformation-custom-resource';
-import { Callback, Context } from 'aws-lambda';
+import {
+  CustomResource,
+  StandardLogger,
+} from 'aws-cloudformation-custom-resource';
+
+//LogLevel,
+import type {
+  DeleteParameterCommandInput,
+  PutParameterCommandInput,
+} from '@aws-sdk/client-ssm';
+import type { Event } from 'aws-cloudformation-custom-resource';
+import type { Callback, Context } from 'aws-lambda';
 
 const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
+const logger = new StandardLogger(3);
 
 export const handler = function (
   event: Event,
   context: Context,
   callback: Callback,
 ) {
-  new CustomResource(context, callback)
+  new CustomResource(context, callback, logger)
     .onCreate(createResource)
     .onUpdate(updateResource)
     .onDelete(deleteResource)
@@ -28,16 +37,18 @@ export const handler = function (
 function createResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
-      Name: event.ResourceProperties.Name,
-      Value: event.ResourceProperties.Value,
+      /* eslint-disable @typescript-eslint/naming-convention */
+      Name: event.ResourceProperties?.Name,
+      Value: event.ResourceProperties?.Value,
       Type: 'String',
       Overwrite: false,
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
     const putParameterCommand = new PutParameterCommand(params);
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        event.addResponseValue('ParameterVersion', data.Version);
+        event.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve(event);
       })
       .catch((error) => {
@@ -49,16 +60,18 @@ function createResource(event: Event): Promise<Event> {
 function updateResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
-      Name: event.ResourceProperties.Name,
-      Value: event.ResourceProperties.Value,
+      /* eslint-disable @typescript-eslint/naming-convention */
+      Name: event.ResourceProperties?.Name,
+      Value: event.ResourceProperties?.Value,
       Type: 'String',
       Overwrite: true,
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
     const putParameterCommand = new PutParameterCommand(params);
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        event.addResponseValue('ParameterVersion', data.Version);
+        event.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve(event);
       })
       .catch((error) => {
@@ -70,7 +83,8 @@ function updateResource(event: Event): Promise<Event> {
 function deleteResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
-      Name: event.ResourceProperties.Name,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Name: event.ResourceProperties?.Name,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient

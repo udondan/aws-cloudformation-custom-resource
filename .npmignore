@@ -14,3 +14,5 @@ Makefile
 VERSION
 .github
 .npm
+.eslint
+.prettierrc

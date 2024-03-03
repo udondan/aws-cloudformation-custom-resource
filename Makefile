@@ -26,7 +26,7 @@ install:
 
 build: install
 	@echo Building library...
-	@rm -r dist
+	@rm -rf dist
 	@npx tsc
 
 test:
@@ -42,3 +42,8 @@ test:
 		exit 1; \
 	fi && \
 	$(MAKE) DESTROY
+
+eslint:
+	@echo "Running eslint $$(npx eslint --version)..."; \
+	npx eslint .; \
+	echo "Passed"
