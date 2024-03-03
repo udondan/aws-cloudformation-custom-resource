@@ -4,7 +4,7 @@ install:
 	@echo Installing dependencies...
 	@npm clean-install --prefer-offline --cache ../.npm
 
-build: install
+build:
 	@echo Building application...
 	@npm run build
 

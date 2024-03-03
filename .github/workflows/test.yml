@@ -41,7 +41,9 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        run: make install
+        run: |
+          make install
+          (cd test && make install)
 
       - name: Linting
         run: make eslint
@@ -55,7 +57,7 @@ jobs:
 
       - name: Test building package
         run: |
-          make install build
+          make build
           npm pack
 
       - name: Success # So we have final step we can explicitly wait for
