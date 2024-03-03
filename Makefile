@@ -24,7 +24,7 @@ install:
 	@echo Installing library dependencies...
 	@npm clean-install --prefer-offline --cache .npm
 
-build: install
+build:
 	@echo Building library...
 	@rm -rf dist
 	@npx tsc

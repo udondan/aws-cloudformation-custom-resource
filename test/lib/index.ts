@@ -20,15 +20,15 @@ export class Stack extends CdkStack {
 
     const stack = CdkStack.of(this);
     const lambdaName = `${stack.stackName}-Test`;
-    const resourceId = 'TestResource20';
+    const resourceId = 'TestResource';
 
     const fn = new aws_lambda_nodejs.NodejsFunction(this, lambdaName, {
       entry: path.join(__dirname, '../lambda/index.ts'),
       functionName: lambdaName,
       runtime: aws_lambda.Runtime.NODEJS_20_X,
       description: 'Testing custom CFN resources',
-      logRetention: 30,
-      timeout: Duration.seconds(30),
+      logRetention: 3,
+      timeout: Duration.seconds(10),
     });
 
     fn.addToRolePolicy(
@@ -41,8 +41,8 @@ export class Stack extends CdkStack {
     );
 
     const resourceProperties: LambdaProperties = {
-      Name: resourceId, // if set, this will be the physical resource ID
-      Value: new Date().toISOString(), // for testing purpose, we always want to update the parameter
+      name: resourceId, // if set, this will be the physical resource ID
+      value: new Date().toISOString(), // for testing purpose, we always want to update the parameter
     };
 
     const queryProps: CustomResourceProps = {

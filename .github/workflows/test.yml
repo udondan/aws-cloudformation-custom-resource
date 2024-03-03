@@ -40,6 +40,12 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Install dependencies
+        run: make install
+
+      - name: Linting
+        run: make eslint
+
       - name: Test package
         run: make test
         env:

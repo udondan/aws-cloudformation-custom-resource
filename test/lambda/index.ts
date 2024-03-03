@@ -38,8 +38,8 @@ function createResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: event.ResourceProperties?.Name,
-      Value: event.ResourceProperties?.Value,
+      Name: event.ResourceProperties?.name,
+      Value: event.ResourceProperties?.value,
       Type: 'String',
       Overwrite: false,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -61,8 +61,8 @@ function updateResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: event.ResourceProperties?.Name,
-      Value: event.ResourceProperties?.Value,
+      Name: event.ResourceProperties?.name,
+      Value: event.ResourceProperties?.value,
       Type: 'String',
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -84,7 +84,7 @@ function deleteResource(event: Event): Promise<Event> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Name: event.ResourceProperties?.Name,
+      Name: event.ResourceProperties?.name,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient

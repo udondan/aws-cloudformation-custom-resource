@@ -13,7 +13,7 @@ export type LambdaEvent = Record<string, unknown> & {
   ResponseURL?: string;
   RequestType: 'Create' | 'Update' | 'Delete';
   ResourceProperties?: Record<string, string> & {
-    Name?: string;
+    name?: string;
   };
   /* eslint-enable @typescript-eslint/naming-convention */
 };
@@ -242,7 +242,7 @@ export class CustomResource {
       PhysicalResourceId:
         this.physicalResourceId ??
         event.PhysicalResourceId ??
-        event.ResourceProperties?.Name ??
+        event.ResourceProperties?.name ??
         this.context.logStreamName,
       StackId: event.StackId,
       RequestId: event.RequestId,
