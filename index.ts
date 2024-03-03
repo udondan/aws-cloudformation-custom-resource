@@ -1,6 +1,4 @@
 import { Callback, Context } from 'aws-lambda';
-// @ ts-expect-error: Suppress TypeScript error for the next line
-//import response = require('cfn-response');
 import https = require('https');
 
 /**
@@ -255,20 +253,12 @@ export class CustomResource {
 
     this.logger.debug('RESPONSE BODY:\n', body);
 
-    //response.send(
-    //  event,
-    //  this.context,
-    //  responseStatus,
-    //  data,
-    //  this.physicalResourceId,
-    //);
-
     const url = new URL(event.ResponseURL!);
 
     const options = {
       hostname: url.hostname,
       port: 443,
-      path: url.pathname,
+      path: `${url.pathname}${url.search}`,
       method: 'PUT',
       headers: {
         /* eslint-disable @typescript-eslint/naming-convention */
@@ -286,14 +276,12 @@ export class CustomResource {
     const request = https.request(options, (response) => {
       this.logger.debug(`STATUS: ${response.statusCode}`);
       this.logger.debug(`HEADERS: ${JSON.stringify(response.headers)}`);
-      this.context.done();
-      //this.callback('done');
+      this.callback('done');
     });
 
     request.on('error', (error) => {
       this.logger.error(`sendResponse Error:`, JSON.stringify(error));
-      this.context.done();
-      //this.callback(null, error);
+      this.callback(null, error);
     });
 
     request.write(body);
