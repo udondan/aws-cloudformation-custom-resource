@@ -28,7 +28,7 @@ export class Stack extends CdkStack {
       runtime: aws_lambda.Runtime.NODEJS_20_X,
       description: 'Testing custom CFN resources',
       logRetention: 3,
-      timeout: Duration.seconds(10),
+      timeout: Duration.seconds(30),
     });
 
     fn.addToRolePolicy(
