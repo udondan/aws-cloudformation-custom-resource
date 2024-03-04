@@ -13,7 +13,6 @@
 .prettierrc
 .release-please-manifest.json
 CHANGELOG.md
-dist/test/**/*
 Makefile
 publish_output.txt
 release-please-config.json

@@ -2,6 +2,5 @@
 **/*.js
 *.tgz
 .npm
-dist
 node_modules
 test/cdk.out

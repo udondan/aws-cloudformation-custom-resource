@@ -13,7 +13,6 @@ install:
 
 build: install
 	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
-	@rm -rf dist
 	@npx tsc
 
 test:
@@ -35,12 +34,12 @@ publish: install
 	@echo -e "$(TARGET_COLOR)Running publish$(NO_COLOR)"
 	@npx tsc -p tsconfig.publish.json
 	@npm publish --dry-run 2>&1 | tee publish_output.txt
-	@if ! grep -q "dist/index.js" publish_output.txt; then \
-		echo "❌ dist/index.js is NOT included in the package"; \
+	@if ! grep -q "src/index.js" publish_output.txt; then \
+		echo "❌ src/index.js is NOT included in the package"; \
 		exit 1; \
 	fi
-	@if ! grep -q "dist/index.d.ts" publish_output.txt; then \
-		echo "❌ dist/index.d.ts is NOT included in the package"; \
+	@if ! grep -q "src/index.d.ts" publish_output.txt; then \
+		echo "❌ src/index.d.ts is NOT included in the package"; \
 		exit 1; \
 	fi
 	@rm publish_output.txt

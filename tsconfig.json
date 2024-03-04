@@ -19,11 +19,10 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "stripInternal": true,
-    "target": "ES2018",
-    "outDir": "dist"
+    "target": "ES2018"
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "swc": true
   }
