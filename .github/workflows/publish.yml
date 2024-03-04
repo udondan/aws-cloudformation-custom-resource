@@ -22,12 +22,6 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: |
-          make install
-          npx tsc -p tsconfig.publish.json
-
-      - name: Publish to NPM
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          dry-run: ${{ github.event_name == 'pull_request' }}
+      - run: make publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

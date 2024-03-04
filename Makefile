@@ -30,3 +30,26 @@ test:
 		exit 1; \
 	fi && \
 	$(MAKE) DESTROY
+
+publish: install
+	@echo Publishing library...
+	@npx tsc -p tsconfig.publish.json
+	@npm publish --dry-run 2>&1 | tee publish_output.txt
+	@if ! grep -q "dist/index.js" publish_output.txt; then \
+		echo "❌ dist/index.js is NOT included in the package"; \
+		exit 1; \
+	fi
+	@if ! grep -q "dist/index.d.ts" publish_output.txt; then \
+		echo "❌ dist/index.d.ts is NOT included in the package"; \
+		exit 1; \
+	fi
+	@rm publish_output.txt
+	@if [ -z "$${NODE_AUTH_TOKEN}" ]; then \
+		echo "⚠️ NODE_AUTH_TOKEN is not set. Skipping publish"; \
+	else \
+		if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+			npm publish
+		else
+			npm publish --dry-run
+		fi
+	fi
