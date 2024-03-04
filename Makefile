@@ -11,6 +11,7 @@ update: push re-release
 install:
 	@echo Installing library dependencies...
 	@npm clean-install --prefer-offline --cache .npm
+	@npm list
 
 build: install
 	@echo Building library...
