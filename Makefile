@@ -43,7 +43,6 @@ publish: install
 		exit 1; \
 	fi
 	@rm publish_output.txt
-	@echo "EVENT NAME: $${GITHUB_EVENT}"
-#	@if [[ "$${{ github.event_name }}" != "pull_request" ]]; then \
-#		npm publish; \
-#	fi
+	@if [[ "$${GITHUB_EVENT}" != "pull_request" ]]; then \
+		npm publish; \
+	fi
