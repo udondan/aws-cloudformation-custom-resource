@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: make build
+      - run: make install build
 
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v3
