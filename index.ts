@@ -19,10 +19,10 @@ export type LambdaEvent = Record<string, unknown> & {
 };
 
 /**
- * The response value returned to CloudFormation
- * Aa Cloudformation will transform any value to a string, we're upfront explicit and only allow strings to avoid surprises
- * Technically it would be possible though, to accept booleans and numbers as well.
+ * A response value returned to CloudFormation.
  */
+// As Cloudformation will transform any value to a string, we're upfront explicit and only allow strings to avoid surprises
+// Technically it would be possible though, to accept booleans and numbers as well.
 type ResponseValue = string;
 
 /**
@@ -232,9 +232,6 @@ export class CustomResource {
       JSON.stringify(responseData, null, 2),
     );
 
-    const data = this.responseData;
-    //data.Message = responseData; // why??
-
     const body = JSON.stringify({
       /* eslint-disable @typescript-eslint/naming-convention */
       Status: responseStatus,
@@ -247,7 +244,7 @@ export class CustomResource {
       StackId: event.StackId,
       RequestId: event.RequestId,
       LogicalResourceId: event.LogicalResourceId,
-      Data: data,
+      Data: this.responseData,
       /* eslint-enable @typescript-eslint/naming-convention */
     });
 

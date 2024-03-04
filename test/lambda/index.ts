@@ -10,7 +10,6 @@ import {
   StandardLogger,
 } from 'aws-cloudformation-custom-resource';
 
-//LogLevel,
 import type {
   DeleteParameterCommandInput,
   PutParameterCommandInput,
