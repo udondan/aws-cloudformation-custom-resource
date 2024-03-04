@@ -43,12 +43,7 @@ publish: install
 		exit 1; \
 	fi
 	@rm publish_output.txt
-	@if [ -z "$${NODE_AUTH_TOKEN}" ]; then \
-		echo "⚠️ NODE_AUTH_TOKEN is not set. Skipping publish"; \
-	else \
-		if [[ "${{ github.event_name }}" != "pull_request" ]]; then
-			npm publish
-		else
-			npm publish --dry-run
-		fi
-	fi
+	@echo "${{ github.event_name }}"
+#	@if [[ "${{ github.event_name }}" != "pull_request" ]]; then \
+#		npm publish; \
+#	fi
