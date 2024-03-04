@@ -49,6 +49,5 @@ jobs:
 
       - name: Test building package
         run: make publish
-
-      - name: Success # So we have final step we can explicitly wait for
-        run: echo "Success"
+        env:
+          GITHUB_EVENT: ${{ github.event_name }}
