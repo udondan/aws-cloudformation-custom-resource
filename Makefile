@@ -42,6 +42,11 @@ publish: install
 		echo "❌ src/index.d.ts is NOT included in the package"; \
 		exit 1; \
 	fi
+	file_count=$$(grep -o "npm notice total files:   [0-9]+" publish_output.txt | awk '{print $$NF}'); \
+	if [[ "$${file_count}" -ne 6 ]]; then \
+		echo "❌ Package does not contain exactly 6 files"; \
+		exit 1; \
+	fi
 	@rm publish_output.txt
 	@if [[ "$${GITHUB_EVENT}" != "pull_request" ]]; then \
 		npm publish; \
