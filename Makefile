@@ -14,7 +14,7 @@ install:
 
 build: install
 	@echo Building library...
-	@rm -rf dist
+	@rm -r dist
 	@npx tsc
 
 test:
