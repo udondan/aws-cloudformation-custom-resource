@@ -43,3 +43,4 @@ jobs:
       - run: make publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_EVENT: ${{ github.event_name }}
