@@ -1,35 +1,22 @@
 SHELL := /bin/bash -euo pipefail
-VERSION := $(shell cat VERSION)
+
+NO_COLOR=\x1b[0m
+TARGET_COLOR=\x1b[96m
+
 .PHONY: test
 
-tag:
-	@git tag -a "v$(VERSION)" -m 'Creates tag "v$(VERSION)"'
-	@git push --tags
-
-untag:
-	@git push --delete origin "v$(VERSION)"
-	@git tag --delete "v$(VERSION)"
-
-release: tag
-
-re-release: untag tag
-
-push:
-	git commit -am testing
-	git push
-
-update: push re-release
-
 install:
-	@echo Installing library dependencies...
+	@echo -e "$(TARGET_COLOR)Running install$(NO_COLOR)"
 	@npm clean-install --prefer-offline --cache .npm
+	@npm list
 
-build:
-	@echo Building library...
+build: install
+	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
 	@rm -rf dist
 	@npx tsc
 
 test:
+	@echo -e "$(TARGET_COLOR)Running test...$(NO_COLOR)"
 	@\
 	cd test && \
 	$(MAKE) build && \
@@ -43,7 +30,24 @@ test:
 	fi && \
 	$(MAKE) DESTROY
 
+publish: install
+	@echo -e "$(TARGET_COLOR)Running publish$(NO_COLOR)"
+	@npx tsc -p tsconfig.publish.json
+	@npm publish --dry-run 2>&1 | tee publish_output.txt
+	@if ! grep -q "dist/index.js" publish_output.txt; then \
+		echo "❌ dist/index.js is NOT included in the package"; \
+		exit 1; \
+	fi
+	@if ! grep -q "dist/index.d.ts" publish_output.txt; then \
+		echo "❌ dist/index.d.ts is NOT included in the package"; \
+		exit 1; \
+	fi
+	@rm publish_output.txt
+	@if [[ "$${GITHUB_EVENT}" != "pull_request" ]]; then \
+		npm publish; \
+	fi
+
 eslint:
-	@echo "Running eslint $$(npx eslint --version)..."; \
+	@echo -e "$(TARGET_COLOR)Running eslint $$(npx eslint --version)...$(NO_COLOR)"
 	npx eslint .; \
 	echo "Passed"

@@ -1,7 +1,7 @@
-node_modules
-dist
-test/cdk.out
 **/*.d.ts
 **/*.js
 *.tgz
 .npm
+dist
+node_modules
+test/cdk.out

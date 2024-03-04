@@ -1,13 +1,11 @@
 {
   "name": "aws-cloudformation-custom-resource",
-  "version": "0.0.0",
+  "version": "3.1.1",
   "description": "Helper for managing custom AWS CloudFormation resources in a Lambda function",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "make build",
-    "prepublishOnly": "make build",
-    "prepack": "make build"
+    "build": "make build"
   },
   "repository": {
     "type": "git",
