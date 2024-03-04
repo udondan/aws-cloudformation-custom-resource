@@ -23,8 +23,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-        make install
-        npx tsc -p tsconfig.publish.json
+          make install
+          npx tsc -p tsconfig.publish.json
 
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v3
