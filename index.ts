@@ -278,7 +278,7 @@ export class CustomResource {
 
     request.on('error', (error) => {
       this.logger.error(`sendResponse Error:`, JSON.stringify(error));
-      this.callback( error);
+      this.callback(error);
     });
 
     request.write(body);
