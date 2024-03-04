@@ -2,7 +2,7 @@
 # Exclude typescript source and config
 *.ts
 tsconfig.json
-tsconfig.tsconfig.publish.json
+tsconfig.publish.json
 
 # Include javascript files and typescript declarations
 !*.js
@@ -17,3 +17,4 @@ Makefile
 .release-please-manifest.json
 release-please-config.json
 CHANGELOG.md
+publish_output.txt
