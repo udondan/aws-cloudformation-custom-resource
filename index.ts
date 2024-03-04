@@ -153,7 +153,7 @@ export class CustomResource {
         Promise.resolve(event as Event)
       );
 
-      (result as Promise<Event>)
+      result
         .then(function (event: Event | Error) {
           self.logger.debug(event);
           self.sendResponse(
