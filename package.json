@@ -6,7 +6,6 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "make build",
-    "prepublishOnly": "make build",
     "prepack": "make build"
   },
   "repository": {
