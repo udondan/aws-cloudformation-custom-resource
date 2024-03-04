@@ -20,7 +20,7 @@ export class Stack extends CdkStack {
 
     const stack = CdkStack.of(this);
     const lambdaName = `${stack.stackName}-Test`;
-    const resourceId = 'TestResource';
+    const resourceId = 'TestResource1';
 
     const fn = new aws_lambda_nodejs.NodejsFunction(this, lambdaName, {
       entry: path.join(__dirname, '../lambda/index.ts'),

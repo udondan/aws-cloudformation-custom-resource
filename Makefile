@@ -35,9 +35,9 @@ test:
 	$(MAKE) build && \
 	$(MAKE) deploy && \
 	$(MAKE) deploy && \
-	version=$$(aws ssm get-parameter --name "TestResource" --query "Parameter.Version" --output text) && \
-	if [ "$$version" -ne 2 ]; then \
-		echo -e "\033[0;31mError: Version is not 2.\033[0m" >&2; \
+	version=$$(aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text) && \
+	if [ "$${version}" -ne 2 ]; then \
+		echo -e "\033[0;31mError: Unexpected version of parameter TestResource1 Got $${version} instead of 2.\033[0m" >&2; \
 		$(MAKE) DESTROY; \
 		exit 1; \
 	fi && \
