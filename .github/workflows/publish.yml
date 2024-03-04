@@ -1,25 +1,25 @@
 ---
-name: Test
-
-concurrency:
-  group: test
-  cancel-in-progress: false
+name: Publish
 
 on:
-  pull_request:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+  pull_request: # for testing, when we change the workflow
     branches:
       - main
-  workflow_dispatch:
+    paths:
+      - .github/workflows/publish.yml
 
 jobs:
-  test:
-    name: Test
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.x
+          registry-url: https://registry.npmjs.org
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,14 +40,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Test package
-        run: make test
+      - run: make publish
         env:
-          AWS_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Test building package
-        run: make publish
-        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_EVENT: ${{ github.event_name }}

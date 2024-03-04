@@ -2,6 +2,7 @@
 # Exclude typescript source and config
 *.ts
 tsconfig.json
+tsconfig.publish.json
 
 # Include javascript files and typescript declarations
 !*.js
@@ -11,6 +12,9 @@ dist/test/**/*
 test/**/*
 *.tgz
 Makefile
-VERSION
 .github
 .npm
+.release-please-manifest.json
+release-please-config.json
+CHANGELOG.md
+publish_output.txt
