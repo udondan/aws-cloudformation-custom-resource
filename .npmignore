@@ -11,6 +11,8 @@ dist/test/**/*
 test/**/*
 *.tgz
 Makefile
-VERSION
 .github
 .npm
+.release-please-manifest.json
+release-please-config.json
+CHANGELOG.md
