@@ -2,7 +2,6 @@
 
 [![npm version](https://badge.fury.io/js/aws-cloudformation-custom-resource.svg)][npm]
 [![npm](https://img.shields.io/npm/dt/aws-cloudformation-custom-resource)][npm]
-[![Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/npm/aws-cloudformation-custom-resource)][npm]
 [![License](https://img.shields.io/github/license/udondan/aws-cloudformation-custom-resource)][license]
 
 Helper for managing custom AWS CloudFormation resources in a Lambda function.

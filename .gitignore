@@ -3,4 +3,5 @@
 *.tgz
 .npm
 node_modules
+publish_output.txt
 test/cdk.out
