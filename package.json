@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "make build",
-    "prepack": "make build"
+    "build": "make build"
   },
   "repository": {
     "type": "git",
