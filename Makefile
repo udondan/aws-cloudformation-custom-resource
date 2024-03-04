@@ -44,6 +44,6 @@ publish: install
 	fi
 	@rm publish_output.txt
 	@echo "EVENT NAME: $${{ github.event_name }}"
-#	@if [[ "${{ github.event_name }}" != "pull_request" ]]; then \
+#	@if [[ "$${{ github.event_name }}" != "pull_request" ]]; then \
 #		npm publish; \
 #	fi
