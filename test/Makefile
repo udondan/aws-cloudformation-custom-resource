@@ -10,12 +10,12 @@ build:
 
 diff:
 	@echo Running diff...
-	@AWS_REGION=us-east-1 npm run cdk -- diff
+	@AWS_REGION=us-east-1 npm run cdk -- diff --color
 
 deploy:
 	@echo Deploying application...
-	@AWS_REGION=us-east-1 npm run cdk -- deploy --require-approval never
+	@AWS_REGION=us-east-1 npm run cdk -- deploy --color --require-approval never
 
 DESTROY:
 	@echo Destroying application...
-	@AWS_REGION=us-east-1 npm run cdk -- destroy --force
+	@AWS_REGION=us-east-1 npm run cdk -- destroy  --color --force
