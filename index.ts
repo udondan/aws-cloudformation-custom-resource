@@ -273,12 +273,12 @@ export class CustomResource {
     const request = https.request(options, (response) => {
       this.logger.debug(`STATUS: ${response.statusCode}`);
       this.logger.debug(`HEADERS: ${JSON.stringify(response.headers)}`);
-      this.callback('done');
+      this.callback(null, 'done');
     });
 
     request.on('error', (error) => {
       this.logger.error(`sendResponse Error:`, JSON.stringify(error));
-      this.callback(null, error);
+      this.callback( error);
     });
 
     request.write(body);

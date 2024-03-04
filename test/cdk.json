@@ -1,4 +1,5 @@
 {
   "app": "npx ts-node bin/app.ts",
-  "progress": "events"
+  "progress": "events",
+  "no-color": false
 }
