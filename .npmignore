@@ -1,20 +1,21 @@
 
 # Exclude typescript source and config
 *.ts
-tsconfig.json
-tsconfig.publish.json
 
 # Include javascript files and typescript declarations
 !*.js
 !*.d.ts
 
-dist/test/**/*
-test/**/*
 *.tgz
-Makefile
+.eslintrc
 .github
 .npm
+.prettierrc
 .release-please-manifest.json
-release-please-config.json
 CHANGELOG.md
+Makefile
 publish_output.txt
+release-please-config.json
+test/**/*
+tsconfig.json
+tsconfig.publish.json

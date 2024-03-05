@@ -20,12 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+          registry-url: https://registry.npmjs.org
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Cache node modules
         id: cache-npm
@@ -39,6 +40,14 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          make install
+          (cd test && make install)
+
+      - name: Linting
+        run: make eslint
 
       - name: Test package
         run: make test
