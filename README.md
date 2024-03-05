@@ -60,5 +60,19 @@ function deleteResource(event: Event): Promise<Event> {
 }
 ```
 
+By default only errors are logged. You can change the log level or use another logging library:
+
+```typescript
+import {
+  CustomResource,
+  StandardLogger,
+  LogLevel,
+} from 'aws-cloudformation-custom-resource';
+
+const logger = new StandardLogger(LogLevel.debug);
+
+new CustomResource(context, callback, logger);
+```
+
 [npm]: https://www.npmjs.com/package/aws-cloudformation-custom-resource
 [license]: https://github.com/udondan/aws-cloudformation-custom-resource/blob/main/LICENSE

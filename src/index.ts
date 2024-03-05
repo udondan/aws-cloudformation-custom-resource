@@ -316,7 +316,7 @@ export interface Logger {
 /**
  * LogLevels supported by the logger
  */
-export const enum LogLevel {
+export enum LogLevel {
   error,
   warn,
   info,
