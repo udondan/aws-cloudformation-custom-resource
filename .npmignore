@@ -16,6 +16,7 @@ CHANGELOG.md
 Makefile
 publish_output.txt
 release-please-config.json
+renovate.json
 test/**/*
 tsconfig.json
 tsconfig.publish.json
