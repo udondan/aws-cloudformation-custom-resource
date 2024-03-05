@@ -15,8 +15,11 @@ import type {
   DeleteParameterCommandInput,
   PutParameterCommandInput,
 } from '@aws-sdk/client-ssm';
-import type { Event } from 'aws-cloudformation-custom-resource';
-import type { Callback, Context } from 'aws-lambda';
+import type {
+  Event,
+  Callback,
+  Context,
+} from 'aws-cloudformation-custom-resource';
 
 const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });

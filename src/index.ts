@@ -1,5 +1,21 @@
-import { Callback, Context } from 'aws-lambda';
 import https = require('https');
+
+export type Callback<TResult = unknown> = (
+  error?: Error | string | null,
+  result?: TResult,
+) => void;
+
+export interface Context {
+  callbackWaitsForEmptyEventLoop: boolean;
+  functionName: string;
+  functionVersion: string;
+  invokedFunctionArn: string;
+  memoryLimitInMB: string;
+  awsRequestId: string;
+  logGroupName: string;
+  logStreamName: string;
+  getRemainingTimeInMillis(): number;
+}
 
 /**
  * The event passed to the Lambda handler
