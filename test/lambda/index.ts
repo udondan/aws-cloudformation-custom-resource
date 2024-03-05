@@ -8,6 +8,7 @@ import {
 import {
   CustomResource,
   StandardLogger,
+  LogLevel,
 } from 'aws-cloudformation-custom-resource';
 
 import type {
@@ -19,7 +20,7 @@ import type { Callback, Context } from 'aws-lambda';
 
 const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
-const logger = new StandardLogger(3);
+const logger = new StandardLogger(LogLevel.debug);
 
 export const handler = function (
   event: Event,
