@@ -4,6 +4,8 @@ NO_COLOR=\x1b[0m
 TARGET_COLOR=\x1b[96m
 ERROR_COLOR=\033[0;31m
 
+PARAMETER_NAME=CustomResourceTestParameter
+
 .PHONY: test
 
 install:
@@ -22,9 +24,9 @@ test:
 	$(MAKE) build && \
 	$(MAKE) deploy && \
 	$(MAKE) deploy && \
-	version=$$(aws ssm get-parameter --name "TestResource1" --query "Parameter.Version" --output text) && \
+	version=$$(aws ssm get-parameter --name "$(PARAMETER_NAME)" --query "Parameter.Version" --output text) && \
 	if [ "$${version}" -ne 2 ]; then \
-		echo -e "$(ERROR_COLOR)Error: Unexpected version of parameter TestResource1 Got $${version} instead of 2.$(NO_COLOR)" >&2; \
+		echo -e "$(ERROR_COLOR)Error: Unexpected version of parameter (PARAMETER_NAME) Got $${version} instead of 2.$(NO_COLOR)" >&2; \
 		$(MAKE) DESTROY; \
 		exit 1; \
 	fi && \
