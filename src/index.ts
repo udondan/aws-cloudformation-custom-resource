@@ -1,5 +1,4 @@
 import { Callback, Context } from 'aws-lambda';
-import { clear } from 'console';
 import https = require('https');
 
 /**
