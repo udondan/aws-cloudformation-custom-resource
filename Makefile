@@ -56,5 +56,5 @@ publish: install
 
 eslint:
 	@echo -e "$(TARGET_COLOR)Running eslint $$(npx eslint --version)$(NO_COLOR)"
-	npx eslint .; \
+	@npx eslint .; \
 	echo "Passed"

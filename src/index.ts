@@ -1,4 +1,5 @@
 import { Callback, Context } from 'aws-lambda';
+import { clear } from 'console';
 import https = require('https');
 
 /**
@@ -88,6 +89,14 @@ export class CustomResource {
    * Logger class
    */
   logger: Logger;
+
+  /**
+   * Timer for the Lambda timeout
+   *
+   * One second before the Lambda times out, we send a FAILED response to CloudFormation.
+   * We store the timer, so we can clear it when we send the response.
+   */
+  timeoutTimer?: NodeJS.Timeout;
 
   constructor(context: Context, callback: Callback, logger?: Logger) {
     this.context = context;
@@ -216,7 +225,10 @@ export class CustomResource {
           this.handleError(event, err);
         });
     };
-    setTimeout(handler, this.context.getRemainingTimeInMillis() - 1000);
+    this.timeoutTimer = setTimeout(
+      handler,
+      this.context.getRemainingTimeInMillis() - 1000,
+    );
   }
 
   /**
@@ -227,6 +239,11 @@ export class CustomResource {
     responseStatus: 'SUCCESS' | 'FAILED',
     responseData: string,
   ) {
+    this.logger.debug(
+      `CLearing timeout timer, as we're about to send a response...`,
+    );
+    clearTimeout(this.timeoutTimer);
+
     this.logger.debug(
       `Sending response ${responseStatus}:`,
       JSON.stringify(responseData, null, 2),
