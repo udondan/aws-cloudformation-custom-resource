@@ -1,4 +1,4 @@
-SHELL := /bin/bash -euo pipefail
+SHELL := /bin/bash -xeuo pipefail
 
 NO_COLOR=\x1b[0m
 TARGET_COLOR=\x1b[96m
@@ -46,7 +46,7 @@ publish: install
 	fi
 	@file_count=$$(grep -o "npm notice total files:   [0-9]+" publish_output.txt | awk '{print $$NF}'); \
 	if [[ "$${file_count}" -ne 5 ]]; then \
-		echo "❌ Package does not contain exactly 6 files"; \
+		echo "❌ Package does not contain exactly 5 files"; \
 		exit 1; \
 	fi
 	@rm publish_output.txt
