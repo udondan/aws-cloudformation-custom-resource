@@ -48,10 +48,7 @@ export const handler = function (
   );
 };
 
-function createResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
+function createResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -65,7 +62,7 @@ function createResource(
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        logger.log('Parameter created successfully.');
+        log.info('Parameter created successfully.');
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
@@ -75,10 +72,7 @@ function createResource(
   });
 }
 
-function updateResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
+function updateResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -92,7 +86,7 @@ function updateResource(
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        logger.log('Parameter updated successfully.');
+        log.info('Parameter updated successfully.');
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
@@ -102,10 +96,7 @@ function updateResource(
   });
 }
 
-function deleteResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
+function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -115,7 +106,7 @@ function deleteResource(
     ssmClient
       .send(deleteParameterCommand)
       .then((_data) => {
-        logger.log('Parameter deleted successfully.');
+        log.info('Parameter deleted successfully.');
         resolve();
       })
       .catch((error) => {
