@@ -188,7 +188,7 @@ export class CustomResource {
       throw new Error('ResponseURL missing');
     }
 
-    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(this.event)}`);
+    this.logger.debug('REQUEST RECEIVED:', JSON.stringify(this.event));
     this.timeout();
 
     try {
@@ -210,7 +210,6 @@ export class CustomResource {
 
       handlerFunction(this, this.logger)
         .then(() => {
-          this.logger.debug(this.event);
           this.sendResponse(
             'SUCCESS',
             `${this.event.RequestType} completed successfully`,
@@ -267,7 +266,7 @@ export class CustomResource {
     responseData: string,
   ) {
     this.logger.debug(
-      `CLearing timeout timer, as we're about to send a response...`,
+      `Clearing timeout timer, as we're about to send a response...`,
     );
     clearTimeout(this.timeoutTimer);
 
@@ -276,10 +275,10 @@ export class CustomResource {
       JSON.stringify(responseData, null, 2),
     );
 
-    const body = JSON.stringify({
+    const body = {
       /* eslint-disable @typescript-eslint/naming-convention */
       Status: responseStatus,
-      Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
+      Reason: `${responseData} | ${responseStatus === 'FAILED' ? 'Full error' : 'Details'} in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
         this.event.ResourceProperties?.name ??
@@ -290,9 +289,9 @@ export class CustomResource {
       Data: this.responseData,
       NoEcho: this.noEcho,
       /* eslint-enable @typescript-eslint/naming-convention */
-    });
+    };
 
-    this.logger.debug('RESPONSE BODY:\n', body);
+    const bodyString = JSON.stringify(body);
 
     const url = new URL(this.event.ResponseURL!);
 
@@ -304,7 +303,7 @@ export class CustomResource {
       headers: {
         /* eslint-disable @typescript-eslint/naming-convention */
         'content-type': '',
-        'content-length': body.length,
+        'content-length': bodyString.length,
         /* eslint-enable @typescript-eslint/naming-convention */
       },
     };
@@ -315,17 +314,19 @@ export class CustomResource {
     );
 
     const request = https.request(options, (response) => {
-      this.logger.debug(`STATUS: ${response.statusCode}`);
-      this.logger.debug(`HEADERS: ${JSON.stringify(response.headers)}`);
+      this.logger.debug('RESULT:', {
+        status: response.statusCode,
+        headers: response.headers,
+      });
       this.callback(null, 'done');
     });
 
     request.on('error', (error) => {
-      this.logger.error(`sendResponse Error:`, JSON.stringify(error));
+      this.logger.error('sendResponse Error:', JSON.stringify(error));
       this.callback(error);
     });
 
-    request.write(body);
+    request.write(bodyString);
     request.end();
   }
 }
