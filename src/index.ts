@@ -210,7 +210,6 @@ export class CustomResource {
 
       handlerFunction(this, this.logger)
         .then(() => {
-          this.logger.debug(this.event);
           this.sendResponse(
             'SUCCESS',
             `${this.event.RequestType} completed successfully`,
@@ -292,8 +291,6 @@ export class CustomResource {
       /* eslint-enable @typescript-eslint/naming-convention */
     });
 
-    this.logger.debug('RESPONSE BODY:\n', body);
-
     const url = new URL(this.event.ResponseURL!);
 
     const options = {
@@ -315,8 +312,8 @@ export class CustomResource {
     );
 
     const request = https.request(options, (response) => {
-      this.logger.debug(`STATUS: ${response.statusCode}`);
-      this.logger.debug(`HEADERS: ${JSON.stringify(response.headers)}`);
+      this.logger.debug(`RESPONSE STATUS:`, response.statusCode);
+      this.logger.debug(`RESPONSE HEADERS:`, JSON.stringify(response.headers));
       this.callback(null, 'done');
     });
 
