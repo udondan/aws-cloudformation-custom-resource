@@ -1,22 +1,7 @@
 
-# Exclude typescript source and config
-*.ts
+*
 
-# Include javascript files and typescript declarations
 !*.js
 !*.d.ts
 
-*.tgz
-.eslintrc
-.github
-.npm
-.prettierrc
-.release-please-manifest.json
-CHANGELOG.md
-Makefile
-publish_output.txt
-release-please-config.json
-renovate.json
-test/**/*
-tsconfig.json
-tsconfig.publish.json
+test
