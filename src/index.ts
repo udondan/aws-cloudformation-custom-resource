@@ -44,7 +44,10 @@ type ResponseValue = string;
 /**
  * Function signature
  */
-export type HandlerFunction = (resource: CustomResource) => Promise<void>;
+export type HandlerFunction = (
+  resource: CustomResource,
+  logger: Logger,
+) => Promise<void>;
 
 /**
  * Custom CloudFormation resource helper
@@ -53,47 +56,47 @@ export class CustomResource {
   /**
    * Stores function executed when resource creation is requested
    */
-  createFunction: HandlerFunction;
+  private createFunction: HandlerFunction;
 
   /**
    * Stores function executed when resource update is requested
    */
-  updateFunction: HandlerFunction;
+  private updateFunction: HandlerFunction;
 
   /**
    * Stores function executed when resource deletion is requested
    */
-  deleteFunction: HandlerFunction;
+  private deleteFunction: HandlerFunction;
 
   /**
    * The event passed to the Lambda handler
    */
-  public event: Event;
+  public readonly event: Event;
 
   /**
    * The context passed to the Lambda handler
    */
-  context: Context;
+  public readonly context: Context;
 
   /**
    * The callback function passed to the Lambda handler
    */
-  callback: Callback;
+  public readonly callback: Callback;
 
   /**
    * Stores values returned to CloudFormation
    */
-  responseData: Record<string, ResponseValue> = {};
+  private responseData: Record<string, ResponseValue> = {};
 
   /**
    * Stores values physical ID of the resource
    */
-  physicalResourceId?: string;
+  private physicalResourceId?: string;
 
   /**
    * Logger class
    */
-  public logger: Logger;
+  private logger: Logger;
 
   /**
    * Timer for the Lambda timeout
@@ -101,7 +104,7 @@ export class CustomResource {
    * One second before the Lambda times out, we send a FAILED response to CloudFormation.
    * We store the timer, so we can clear it when we send the response.
    */
-  timeoutTimer?: NodeJS.Timeout;
+  private timeoutTimer?: NodeJS.Timeout;
 
   constructor(
     event: Event,
@@ -164,7 +167,7 @@ export class CustomResource {
         return this;
       }
 
-      handlerFunction(this)
+      handlerFunction(this, this.logger)
         .then(() => {
           this.logger.debug(this.event);
           this.sendResponse(

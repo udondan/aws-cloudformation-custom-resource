@@ -19,6 +19,7 @@ import type {
   Event,
   Callback,
   Context,
+  Logger,
 } from 'aws-cloudformation-custom-resource';
 
 const region = 'us-east-1';
@@ -41,7 +42,10 @@ export const handler = function (
   );
 };
 
-function createResource(resource: CustomResource): Promise<void> {
+function createResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -55,6 +59,7 @@ function createResource(resource: CustomResource): Promise<void> {
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
+        logger.log('Parameter created successfully.');
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
@@ -64,7 +69,10 @@ function createResource(resource: CustomResource): Promise<void> {
   });
 }
 
-function updateResource(resource: CustomResource): Promise<void> {
+function updateResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -78,6 +86,7 @@ function updateResource(resource: CustomResource): Promise<void> {
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
+        logger.log('Parameter updated successfully.');
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
@@ -87,7 +96,10 @@ function updateResource(resource: CustomResource): Promise<void> {
   });
 }
 
-function deleteResource(resource: CustomResource): Promise<void> {
+function deleteResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -97,6 +109,7 @@ function deleteResource(resource: CustomResource): Promise<void> {
     ssmClient
       .send(deleteParameterCommand)
       .then((_data) => {
+        logger.log('Parameter deleted successfully.');
         resolve();
       })
       .catch((error) => {
