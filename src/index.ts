@@ -314,7 +314,7 @@ export class CustomResource {
     );
 
     const request = https.request(options, (response) => {
-      this.logger.debug(`RESPONSE:`, {
+      this.logger.debug(`RESULT:`, {
         status: response.statusCode,
         headers: JSON.stringify(response.headers),
       });
