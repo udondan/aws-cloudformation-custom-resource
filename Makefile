@@ -15,6 +15,10 @@ install:
 
 build: install
 	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
+	@find . -type f \( -name "*.js" -o -name "*.d.ts" \) \
+		| grep -v 'node_modules' \
+		| grep -v 'cdk.out/asset' \
+		| xargs rm -f
 	@npx tsc
 
 test:
