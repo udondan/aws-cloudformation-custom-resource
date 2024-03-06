@@ -94,6 +94,13 @@ export class CustomResource {
   private physicalResourceId?: string;
 
   /**
+   * Indicates whether to mask the output of the custom resource when it's retrieved by using the `Fn::GetAtt` function.
+   *
+   * If set to `true`, all returned values are masked with asterisks (*****), except for information stored in the locations specified below. By default, this value is `false`.
+   */
+  private noEcho = false;
+
+  /**
    * Logger class
    */
   private logger: Logger;
@@ -113,7 +120,6 @@ export class CustomResource {
     createFunction: HandlerFunction,
     updateFunction: HandlerFunction,
     deleteFunction: HandlerFunction,
-    logger?: Logger,
   ) {
     this.event = event;
     this.context = context;
@@ -121,8 +127,13 @@ export class CustomResource {
     this.createFunction = createFunction;
     this.updateFunction = updateFunction;
     this.deleteFunction = deleteFunction;
-    this.logger = logger ?? new StandardLogger();
-    this.handle();
+    this.logger = new StandardLogger();
+    if (this.event.PhysicalResourceId) {
+      this.setPhysicalResourceId(this.event.PhysicalResourceId);
+    }
+    setTimeout(() => {
+      this.handle();
+    });
   }
 
   /**
@@ -137,6 +148,36 @@ export class CustomResource {
    */
   setPhysicalResourceId(value: string) {
     this.physicalResourceId = value;
+  }
+
+  /**
+   * Get the physical ID of the resource
+   */
+  getPhysicalResourceId() {
+    return this.physicalResourceId;
+  }
+
+  /**
+   * Set whether to mask the output of the custom resource when it's retrieved by using the `Fn::GetAtt` function.
+   *
+   * If set to `true`, all returned values are masked with asterisks (*****), except for information stored in the locations specified below. By default, this value is `false`.
+   */
+  setNoEcho(value: boolean) {
+    this.noEcho = value;
+  }
+
+  /**
+   * Get whether to mask the output of the custom resource when it's retrieved by using the `Fn::GetAtt` function.
+   */
+  getNoEcho() {
+    return this.noEcho;
+  }
+
+  /**
+   * Set the logger class
+   */
+  setLogger(logger: Logger) {
+    this.logger = logger;
   }
 
   /**
@@ -184,7 +225,7 @@ export class CustomResource {
     return this;
   }
 
-  handleError(err: unknown) {
+  private handleError(err: unknown) {
     console.log(err);
     this.logger.error(JSON.stringify(err, null, 2));
 
@@ -203,7 +244,7 @@ export class CustomResource {
   /**
    * Sends CloudFormation response just before the Lambda times out
    */
-  timeout() {
+  private timeout() {
     const handler = () => {
       this.logger.error('Timeout FAILURE!');
       new Promise(() => this.sendResponse('FAILED', 'Function timed out'))
@@ -221,7 +262,10 @@ export class CustomResource {
   /**
    * Sends CloudFormation response
    */
-  sendResponse(responseStatus: 'SUCCESS' | 'FAILED', responseData: string) {
+  private sendResponse(
+    responseStatus: 'SUCCESS' | 'FAILED',
+    responseData: string,
+  ) {
     this.logger.debug(
       `CLearing timeout timer, as we're about to send a response...`,
     );
@@ -238,13 +282,13 @@ export class CustomResource {
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
-        this.event.PhysicalResourceId ??
         this.event.ResourceProperties?.name ??
         this.context.logStreamName,
       StackId: this.event.StackId,
       RequestId: this.event.RequestId,
       LogicalResourceId: this.event.LogicalResourceId,
       Data: this.responseData,
+      NoEcho: this.noEcho,
       /* eslint-enable @typescript-eslint/naming-convention */
     });
 

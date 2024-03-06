@@ -31,14 +31,20 @@ export const handler = function (
   context: Context,
   callback: Callback,
 ) {
-  new CustomResource(
+  const resource = new CustomResource(
     event,
     context,
     callback,
     createResource,
     updateResource,
     deleteResource,
-    logger,
+  );
+
+  resource.setLogger(logger);
+  resource.setNoEcho(true);
+
+  logger.debug(
+    `Physical resource ID: ${resource.getPhysicalResourceId() ?? 'undefined'}`,
   );
 };
 
