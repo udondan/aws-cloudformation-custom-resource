@@ -25,9 +25,15 @@ const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
 const logger = new StandardLogger(LogLevel.debug);
 
-export const handler = function (...lambdaArgs: [Event, Context, Callback]) {
+export const handler = function (
+  event: Event,
+  context: Context,
+  callback: Callback,
+) {
   new CustomResource(
-    ...lambdaArgs,
+    event,
+    context,
+    callback,
     createResource,
     updateResource,
     deleteResource,
