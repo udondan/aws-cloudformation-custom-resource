@@ -1,5 +1,5 @@
 // This test implementation manages an SSM parameter identified by the given `Name` property and returns the `ParameterVersion` as a response value.
-// Of course this does not make much sense, but it is a simple test case suits as an example of how to use the `aws-cloudformation-custom-resource` package to create a custom resource.
+// Of course this does not make much sense, but it is a simple test case and suits as an example of how to use the `aws-cloudformation-custom-resource` package to manage custom resources.
 import {
   DeleteParameterCommand,
   PutParameterCommand,
@@ -19,6 +19,7 @@ import type {
   Event,
   Callback,
   Context,
+  Logger,
 } from 'aws-cloudformation-custom-resource';
 
 const region = 'us-east-1';
@@ -30,19 +31,26 @@ export const handler = function (
   context: Context,
   callback: Callback,
 ) {
-  new CustomResource(context, callback, logger)
-    .onCreate(createResource)
-    .onUpdate(updateResource)
-    .onDelete(deleteResource)
-    .handle(event);
+  new CustomResource(
+    event,
+    context,
+    callback,
+    createResource,
+    updateResource,
+    deleteResource,
+    logger,
+  );
 };
 
-function createResource(event: Event): Promise<Event> {
+function createResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: event.ResourceProperties?.name,
-      Value: event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties?.name,
+      Value: resource.event.ResourceProperties?.value,
       Type: 'String',
       Overwrite: false,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -51,8 +59,9 @@ function createResource(event: Event): Promise<Event> {
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        event.addResponseValue('ParameterVersion', data.Version!.toString());
-        resolve(event);
+        logger.log('Parameter created successfully.');
+        resource.addResponseValue('ParameterVersion', data.Version!.toString());
+        resolve();
       })
       .catch((error) => {
         reject(error);
@@ -60,12 +69,15 @@ function createResource(event: Event): Promise<Event> {
   });
 }
 
-function updateResource(event: Event): Promise<Event> {
+function updateResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: event.ResourceProperties?.name,
-      Value: event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties?.name,
+      Value: resource.event.ResourceProperties?.value,
       Type: 'String',
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -74,8 +86,9 @@ function updateResource(event: Event): Promise<Event> {
     ssmClient
       .send(putParameterCommand)
       .then((data) => {
-        event.addResponseValue('ParameterVersion', data.Version!.toString());
-        resolve(event);
+        logger.log('Parameter updated successfully.');
+        resource.addResponseValue('ParameterVersion', data.Version!.toString());
+        resolve();
       })
       .catch((error) => {
         reject(error);
@@ -83,17 +96,21 @@ function updateResource(event: Event): Promise<Event> {
   });
 }
 
-function deleteResource(event: Event): Promise<Event> {
+function deleteResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Name: event.ResourceProperties?.name,
+      Name: resource.event.ResourceProperties?.name,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient
       .send(deleteParameterCommand)
       .then((_data) => {
-        resolve(event);
+        logger.log('Parameter deleted successfully.');
+        resolve();
       })
       .catch((error) => {
         reject(error);

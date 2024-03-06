@@ -20,7 +20,7 @@ export interface Context {
 /**
  * The event passed to the Lambda handler
  */
-export type LambdaEvent = Record<string, unknown> & {
+export type Event = Record<string, unknown> & {
   /* eslint-disable @typescript-eslint/naming-convention */
   PhysicalResourceId?: string;
   StackId: string;
@@ -42,68 +42,61 @@ export type LambdaEvent = Record<string, unknown> & {
 type ResponseValue = string;
 
 /**
- * The event passed through the promises.
- */
-export interface Event extends LambdaEvent {
-  /**
-   * Adds values to the response returned to CloudFormation
-   */
-  addResponseValue: (key: string, value: ResponseValue) => void;
-
-  /**
-   * Set the physical ID of the resource
-   */
-  setPhysicalResourceId: (value: string) => void;
-}
-
-/**
  * Function signature
  */
-export type HandlerFunction = (event: Event) => Promise<Event>;
+export type HandlerFunction = (
+  resource: CustomResource,
+  logger: Logger,
+) => Promise<void>;
 
 /**
  * Custom CloudFormation resource helper
  */
 export class CustomResource {
   /**
-   * Stores functions executed when resource creation is requested
+   * Stores function executed when resource creation is requested
    */
-  createFunctions: HandlerFunction[] = [];
+  private createFunction: HandlerFunction;
 
   /**
-   * Stores functions executed when resource update is requested
+   * Stores function executed when resource update is requested
    */
-  updateFunctions: HandlerFunction[] = [];
+  private updateFunction: HandlerFunction;
 
   /**
-   * Stores functions executed when resource deletion is requested
+   * Stores function executed when resource deletion is requested
    */
-  deleteFunctions: HandlerFunction[] = [];
+  private deleteFunction: HandlerFunction;
+
+  /**
+   * The event passed to the Lambda handler
+   */
+  public readonly event: Event;
 
   /**
    * The context passed to the Lambda handler
    */
-  context: Context;
+  public readonly context: Context;
 
   /**
    * The callback function passed to the Lambda handler
    */
-  callback: Callback;
+  public readonly callback: Callback;
 
   /**
    * Stores values returned to CloudFormation
    */
-  responseData: Record<string, ResponseValue> = {};
+  private responseData: Record<string, ResponseValue> = {};
 
   /**
    * Stores values physical ID of the resource
    */
-  physicalResourceId?: string;
+  private physicalResourceId?: string;
 
   /**
    * Logger class
    */
-  logger: Logger;
+  private logger: Logger;
 
   /**
    * Timer for the Lambda timeout
@@ -111,106 +104,87 @@ export class CustomResource {
    * One second before the Lambda times out, we send a FAILED response to CloudFormation.
    * We store the timer, so we can clear it when we send the response.
    */
-  timeoutTimer?: NodeJS.Timeout;
+  private timeoutTimer?: NodeJS.Timeout;
 
-  constructor(context: Context, callback: Callback, logger?: Logger) {
+  constructor(
+    event: Event,
+    context: Context,
+    callback: Callback,
+    createFunction: HandlerFunction,
+    updateFunction: HandlerFunction,
+    deleteFunction: HandlerFunction,
+    logger?: Logger,
+  ) {
+    this.event = event;
     this.context = context;
     this.callback = callback;
+    this.createFunction = createFunction;
+    this.updateFunction = updateFunction;
+    this.deleteFunction = deleteFunction;
     this.logger = logger ?? new StandardLogger();
+    this.handle();
   }
 
   /**
-   * Adds a function to the CREATE queue
+   * Adds values to the response returned to CloudFormation
    */
-  onCreate(func: HandlerFunction): this {
-    this.createFunctions.push(func);
-    return this;
+  addResponseValue(key: string, value: ResponseValue) {
+    this.responseData[key] = value;
   }
 
   /**
-   * Adds a function to the UPDATE queue
+   * Set the physical ID of the resource
    */
-  onUpdate(func: HandlerFunction): this {
-    this.updateFunctions.push(func);
-    return this;
-  }
-
-  /**
-   * Adds a function to the DELETE queue
-   */
-  onDelete(func: HandlerFunction): this {
-    this.deleteFunctions.push(func);
-    return this;
+  setPhysicalResourceId(value: string) {
+    this.physicalResourceId = value;
   }
 
   /**
    * Handles the Lambda event
    */
-  handle(event: LambdaEvent): this {
-    const lambdaEvent = event;
-
-    if (typeof lambdaEvent.ResponseURL === 'undefined') {
+  private handle(): this {
+    if (typeof this.event.ResponseURL === 'undefined') {
       throw new Error('ResponseURL missing');
     }
 
-    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(lambdaEvent)}`);
-    this.timeout(lambdaEvent);
-
-    event.addResponseValue = (key: string, value: ResponseValue) => {
-      this.responseData[key] = value;
-    };
-
-    event.setPhysicalResourceId = (value: string) => {
-      this.physicalResourceId = value;
-    };
+    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(this.event)}`);
+    this.timeout();
 
     try {
-      let queue: HandlerFunction[];
-      if (lambdaEvent.RequestType == 'Create') queue = this.createFunctions;
-      else if (lambdaEvent.RequestType == 'Update')
-        queue = this.updateFunctions;
-      else if (lambdaEvent.RequestType == 'Delete')
-        queue = this.deleteFunctions;
+      let handlerFunction: HandlerFunction;
+      if (this.event.RequestType == 'Create')
+        handlerFunction = this.createFunction;
+      else if (this.event.RequestType == 'Update')
+        handlerFunction = this.updateFunction;
+      else if (this.event.RequestType == 'Delete')
+        handlerFunction = this.deleteFunction;
       else {
         this.sendResponse(
-          lambdaEvent,
           'FAILED',
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `Unexpected request type: ${lambdaEvent.RequestType}`,
+          `Unexpected request type: ${this.event.RequestType}`,
         );
         return this;
       }
 
-      const result = queue.reduce(
-        async (
-          current: Promise<Event> | HandlerFunction,
-          next: HandlerFunction,
-        ) => {
-          const value = await (current as Promise<Event>);
-          return await next(value);
-        },
-        Promise.resolve(event as Event),
-      );
-
-      result
-        .then((event: Event) => {
-          this.logger.debug(event);
+      handlerFunction(this, this.logger)
+        .then(() => {
+          this.logger.debug(this.event);
           this.sendResponse(
-            lambdaEvent,
             'SUCCESS',
-            `${lambdaEvent.RequestType} completed successfully`,
+            `${this.event.RequestType} completed successfully`,
           );
         })
         .catch((err: unknown) => {
-          this.handleError(event, err);
+          this.handleError(err);
         });
     } catch (err) {
-      this.handleError(event, err);
+      this.handleError(err);
     }
     return this;
   }
 
-  handleError(event: LambdaEvent, err: unknown) {
+  handleError(err: unknown) {
     console.log(err);
     this.logger.error(JSON.stringify(err, null, 2));
 
@@ -223,21 +197,19 @@ export class CustomResource {
       errorMessage = `Unknown error: ${JSON.stringify(err)}`;
     }
 
-    this.sendResponse(event, 'FAILED', errorMessage);
+    this.sendResponse('FAILED', errorMessage);
   }
 
   /**
    * Sends CloudFormation response just before the Lambda times out
    */
-  timeout(event: LambdaEvent) {
+  timeout() {
     const handler = () => {
       this.logger.error('Timeout FAILURE!');
-      new Promise(() =>
-        this.sendResponse(event, 'FAILED', 'Function timed out'),
-      )
+      new Promise(() => this.sendResponse('FAILED', 'Function timed out'))
         .then(() => this.callback(new Error('Function timed out')))
         .catch((err: unknown) => {
-          this.handleError(event, err);
+          this.handleError(err);
         });
     };
     this.timeoutTimer = setTimeout(
@@ -249,11 +221,7 @@ export class CustomResource {
   /**
    * Sends CloudFormation response
    */
-  sendResponse(
-    event: LambdaEvent,
-    responseStatus: 'SUCCESS' | 'FAILED',
-    responseData: string,
-  ) {
+  sendResponse(responseStatus: 'SUCCESS' | 'FAILED', responseData: string) {
     this.logger.debug(
       `CLearing timeout timer, as we're about to send a response...`,
     );
@@ -270,19 +238,19 @@ export class CustomResource {
       Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
-        event.PhysicalResourceId ??
-        event.ResourceProperties?.name ??
+        this.event.PhysicalResourceId ??
+        this.event.ResourceProperties?.name ??
         this.context.logStreamName,
-      StackId: event.StackId,
-      RequestId: event.RequestId,
-      LogicalResourceId: event.LogicalResourceId,
+      StackId: this.event.StackId,
+      RequestId: this.event.RequestId,
+      LogicalResourceId: this.event.LogicalResourceId,
       Data: this.responseData,
       /* eslint-enable @typescript-eslint/naming-convention */
     });
 
     this.logger.debug('RESPONSE BODY:\n', body);
 
-    const url = new URL(event.ResponseURL!);
+    const url = new URL(this.event.ResponseURL!);
 
     const options = {
       hostname: url.hostname,

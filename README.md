@@ -13,49 +13,70 @@ You can find a complete example in the [test](test) directory.
 Basic usage:
 
 ```typescript
-import { CustomResource, Event } from 'aws-cloudformation-custom-resource';
-import { Callback, Context } from 'aws-lambda';
+import {
+  Callback,
+  Context,
+  CustomResource,
+  Event,
+  Logger,
+} from 'aws-cloudformation-custom-resource';
 
 export const handler = function (
   event: Event,
   context: Context,
   callback: Callback,
 ) {
-  new CustomResource(context, callback)
-    .onCreate(createResource)
-    .onUpdate(updateResource)
-    .onDelete(deleteResource)
-    .handle(event);
+  new CustomResource(
+    event,
+    context,
+    callback,
+    createResource,
+    updateResource,
+    deleteResource,
+  );
 };
 
-function createResource(event: Event): Promise<Event> {
+function createResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
+    logger.log('Hello from create');
+
     // Every custom resource requires a physical ID.
     // Either you can pass a `Name` parameter to the lambda function
     // or you can manually set the ID:
-    event.setPhysicalResourceId('some-physical-resource-id');
+    resource.setPhysicalResourceId('some-physical-resource-id');
 
     // you can return values from the Lambda function:
-    event.addResponseValue('Foo', 'bar');
+    resource.addResponseValue('Foo', 'bar');
 
     // do stuff
-    resolve(event);
+    resolve();
   });
 }
 
-function updateResource(event: Event): Promise<Event> {
+function updateResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
+  logger.log('Hello from update');
   return new Promise(function (resolve, reject) {
-    event.addResponseValue('Foo', 'bar');
+    resource.addResponseValue('Foo', 'bar');
 
     // do stuff
-    resolve(event);
+    resolve();
   });
 }
 
-function deleteResource(event: Event): Promise<Event> {
+function deleteResource(
+  resource: CustomResource,
+  logger: Logger,
+): Promise<void> {
+  logger.log('Hello from delete');
   return new Promise(function (resolve, reject) {
     // do stuff
-    resolve(event);
+    resolve();
   });
 }
 ```
@@ -64,14 +85,25 @@ By default only errors are logged. You can change the log level or use another l
 
 ```typescript
 import {
+  Callback,
+  Context,
   CustomResource,
-  StandardLogger,
+  Event,
   LogLevel,
+  StandardLogger,
 } from 'aws-cloudformation-custom-resource';
 
 const logger = new StandardLogger(LogLevel.debug);
 
-new CustomResource(context, callback, logger);
+new CustomResource(
+  event,
+  context,
+  callback,
+  createResource,
+  updateResource,
+  deleteResource,
+  logger,
+);
 ```
 
 [npm]: https://www.npmjs.com/package/aws-cloudformation-custom-resource
