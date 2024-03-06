@@ -36,12 +36,9 @@ export const handler = function (
   );
 };
 
-function createResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
+function createResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
-    logger.log('Hello from create');
+    log.log('Hello from create');
 
     // Every custom resource requires a physical ID.
     // Either you can pass a `Name` parameter to the lambda function
@@ -56,11 +53,8 @@ function createResource(
   });
 }
 
-function updateResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
-  logger.log('Hello from update');
+function updateResource(resource: CustomResource, log: Logger): Promise<void> {
+  log.log('Hello from update');
   return new Promise(function (resolve, reject) {
     resource.addResponseValue('Foo', 'bar');
 
@@ -69,11 +63,8 @@ function updateResource(
   });
 }
 
-function deleteResource(
-  resource: CustomResource,
-  logger: Logger,
-): Promise<void> {
-  logger.log('Hello from delete');
+function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
+  log.log('Hello from delete');
   return new Promise(function (resolve, reject) {
     // do stuff
     resolve();
@@ -95,15 +86,16 @@ import {
 
 const logger = new StandardLogger(LogLevel.debug);
 
-new CustomResource(
+const resource = new CustomResource(
   event,
   context,
   callback,
   createResource,
   updateResource,
   deleteResource,
-  logger,
 );
+
+resource.setLogger(logger);
 ```
 
 [npm]: https://www.npmjs.com/package/aws-cloudformation-custom-resource
