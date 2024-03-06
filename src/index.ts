@@ -188,7 +188,7 @@ export class CustomResource {
       throw new Error('ResponseURL missing');
     }
 
-    this.logger.debug(`REQUEST RECEIVED:\n${JSON.stringify(this.event)}`);
+    this.logger.debug('REQUEST RECEIVED:', JSON.stringify(this.event));
     this.timeout();
 
     try {
@@ -266,7 +266,7 @@ export class CustomResource {
     responseData: string,
   ) {
     this.logger.debug(
-      `CLearing timeout timer, as we're about to send a response...`,
+      `Clearing timeout timer, as we're about to send a response...`,
     );
     clearTimeout(this.timeoutTimer);
 
@@ -278,7 +278,7 @@ export class CustomResource {
     const body = {
       /* eslint-disable @typescript-eslint/naming-convention */
       Status: responseStatus,
-      Reason: `${responseData} | Full error in CloudWatch ${this.context.logStreamName}`,
+      Reason: `${responseData} | ${responseStatus === 'FAILED' ? 'Full error' : 'Details'} in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
         this.event.ResourceProperties?.name ??
@@ -314,7 +314,7 @@ export class CustomResource {
     );
 
     const request = https.request(options, (response) => {
-      this.logger.debug(`RESULT:`, {
+      this.logger.debug('RESULT:', {
         status: response.statusCode,
         headers: JSON.stringify(response.headers),
       });
@@ -322,7 +322,7 @@ export class CustomResource {
     });
 
     request.on('error', (error) => {
-      this.logger.error(`sendResponse Error:`, JSON.stringify(error));
+      this.logger.error('sendResponse Error:', JSON.stringify(error));
       this.callback(error);
     });
 
