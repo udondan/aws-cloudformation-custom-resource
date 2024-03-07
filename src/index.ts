@@ -53,9 +53,7 @@ export type HandlerFunction<T> = (
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource<
-  T extends Record<string, string> = Record<string, string>,
-> {
+export class CustomResource<T> {
   /**
    * Stores function executed when resource creation is requested
    */
@@ -290,7 +288,7 @@ export class CustomResource<
       Reason: `${responseData} | ${responseStatus === 'FAILED' ? 'Full error' : 'Details'} in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
-        this.event.ResourceProperties?.name ??
+        (this.event.ResourceProperties as Record<string, string>).name ??
         this.context.logStreamName,
       StackId: this.event.StackId,
       RequestId: this.event.RequestId,

@@ -39,7 +39,7 @@ export const handler = function (
   context: Context,
   callback: Callback,
 ) {
-  const resource = new CustomResource(
+  const resource = new CustomResource<ResourceProperties>(
     event,
     context,
     callback,
@@ -56,10 +56,11 @@ export const handler = function (
   );
 };
 
-function createResource(resource: CustomResource, log: Logger): Promise<void> {
+function createResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
-    resource.event.ResourceProperties.foo;
-
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
       Name: resource.event.ResourceProperties.name,
@@ -82,7 +83,10 @@ function createResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function updateResource(resource: CustomResource, log: Logger): Promise<void> {
+function updateResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
@@ -106,7 +110,10 @@ function updateResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
+function deleteResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
