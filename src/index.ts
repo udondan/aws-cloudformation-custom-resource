@@ -20,7 +20,10 @@ export interface Context {
 /**
  * The event passed to the Lambda handler
  */
-export type Event = Record<string, unknown> & {
+export type Event<T = Record<string, string>> = Omit<
+  Record<string, unknown>,
+  'ResourceProperties'
+> & {
   /* eslint-disable @typescript-eslint/naming-convention */
   PhysicalResourceId?: string;
   StackId: string;
@@ -28,9 +31,7 @@ export type Event = Record<string, unknown> & {
   LogicalResourceId: string;
   ResponseURL?: string;
   RequestType: 'Create' | 'Update' | 'Delete';
-  ResourceProperties?: Record<string, string> & {
-    name?: string;
-  };
+  ResourceProperties: T;
   /* eslint-enable @typescript-eslint/naming-convention */
 };
 
@@ -52,7 +53,9 @@ export type HandlerFunction = (
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource {
+export class CustomResource<
+  T extends Record<string, string> = Record<string, string>,
+> {
   /**
    * Stores function executed when resource creation is requested
    */
@@ -114,7 +117,7 @@ export class CustomResource {
   private timeoutTimer?: NodeJS.Timeout;
 
   constructor(
-    event: Event,
+    event: Event<T>,
     context: Context,
     callback: Callback,
     createFunction: HandlerFunction,

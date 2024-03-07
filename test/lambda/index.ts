@@ -26,8 +26,16 @@ const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
 const logger = new StandardLogger(LogLevel.debug);
 
+interface ResourceProperties {
+  /** Name of the parameter */
+  name: string;
+
+  /** Value of the parameter */
+  value: string;
+}
+
 export const handler = function (
-  event: Event,
+  event: Event<ResourceProperties>,
   context: Context,
   callback: Callback,
 ) {
@@ -50,10 +58,12 @@ export const handler = function (
 
 function createResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
+    resource.event.ResourceProperties.foo;
+
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.event.ResourceProperties?.name,
-      Value: resource.event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties.name,
+      Value: resource.event.ResourceProperties.value,
       Type: 'String',
       Overwrite: false,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -76,8 +86,8 @@ function updateResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.event.ResourceProperties?.name,
-      Value: resource.event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties.name,
+      Value: resource.event.ResourceProperties.value,
       Type: 'String',
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -100,7 +110,7 @@ function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Name: resource.event.ResourceProperties?.name,
+      Name: resource.event.ResourceProperties.name,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient
