@@ -10,6 +10,8 @@ Helper for managing custom AWS CloudFormation resources in a Lambda function.
 
 You can find a complete example in the [test](test) directory.
 
+The use of generics is optional. If no `ResourceProperties` is passed to the `Event` and `CustomResource`, the default type is `Records<string, string>`.
+
 Basic usage:
 
 ```typescript
@@ -21,12 +23,17 @@ import {
   Logger,
 } from 'aws-cloudformation-custom-resource';
 
+export interface ResourceProperties {
+  name: string;
+  value: string;
+}
+
 export const handler = function (
-  event: Event,
+  event: Event<ResourceProperties>,
   context: Context,
   callback: Callback,
 ) {
-  new CustomResource(
+  new CustomResource<ResourceProperties>(
     event,
     context,
     callback,
@@ -36,12 +43,16 @@ export const handler = function (
   );
 };
 
-function createResource(resource: CustomResource, log: Logger): Promise<void> {
+function createResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     log.log('Hello from create');
 
     // Every custom resource requires a physical ID.
     // Either you can pass a `name` parameter to the lambda function
+    // (accessed via `resource.event.ResourceProperties.name`)
     // or you can manually set the ID:
     resource.setPhysicalResourceId('some-physical-resource-id');
 
@@ -53,7 +64,10 @@ function createResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function updateResource(resource: CustomResource, log: Logger): Promise<void> {
+function updateResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   log.log('Hello from update');
   return new Promise(function (resolve, reject) {
     resource.addResponseValue('Foo', 'bar');
@@ -63,7 +77,10 @@ function updateResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
+function deleteResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   log.log('Hello from delete');
   return new Promise(function (resolve, reject) {
     // do stuff
