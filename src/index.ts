@@ -20,7 +20,7 @@ export interface Context {
 /**
  * The event passed to the Lambda handler
  */
-export type Event<T = Record<string, string>> = Omit<
+export type Event<ResourceProperties = Record<string, string>> = Omit<
   Record<string, unknown>,
   'ResourceProperties'
 > & {
@@ -31,7 +31,7 @@ export type Event<T = Record<string, string>> = Omit<
   LogicalResourceId: string;
   ResponseURL?: string;
   RequestType: 'Create' | 'Update' | 'Delete';
-  ResourceProperties: T;
+  ResourceProperties: ResourceProperties;
   /* eslint-enable @typescript-eslint/naming-convention */
 };
 
@@ -45,34 +45,34 @@ type ResponseValue = string;
 /**
  * Function signature
  */
-export type HandlerFunction<T> = (
-  resource: CustomResource<T>,
+export type HandlerFunction<ResourceProperties> = (
+  resource: CustomResource<ResourceProperties>,
   logger: Logger,
 ) => Promise<void>;
 
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource<T = Record<string, string>> {
+export class CustomResource<ResourceProperties = Record<string, string>> {
   /**
    * Stores function executed when resource creation is requested
    */
-  private createFunction: HandlerFunction<T>;
+  private createFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource update is requested
    */
-  private updateFunction: HandlerFunction<T>;
+  private updateFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource deletion is requested
    */
-  private deleteFunction: HandlerFunction<T>;
+  private deleteFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * The event passed to the Lambda handler
    */
-  public readonly event: Event<T>;
+  public readonly event: Event<ResourceProperties>;
 
   /**
    * The context passed to the Lambda handler
@@ -115,12 +115,12 @@ export class CustomResource<T = Record<string, string>> {
   private timeoutTimer?: NodeJS.Timeout;
 
   constructor(
-    event: Event<T>,
+    event: Event<ResourceProperties>,
     context: Context,
     callback: Callback,
-    createFunction: HandlerFunction<T>,
-    updateFunction: HandlerFunction<T>,
-    deleteFunction: HandlerFunction<T>,
+    createFunction: HandlerFunction<ResourceProperties>,
+    updateFunction: HandlerFunction<ResourceProperties>,
+    deleteFunction: HandlerFunction<ResourceProperties>,
   ) {
     this.event = event;
     this.context = context;
@@ -193,7 +193,7 @@ export class CustomResource<T = Record<string, string>> {
     this.timeout();
 
     try {
-      let handlerFunction: HandlerFunction<T>;
+      let handlerFunction: HandlerFunction<ResourceProperties>;
       switch (
         this.event.RequestType // Changed to switch for better readability
       ) {
