@@ -45,8 +45,8 @@ type ResponseValue = string;
 /**
  * Function signature
  */
-export type HandlerFunction = (
-  resource: CustomResource,
+export type HandlerFunction<T> = (
+  resource: CustomResource<T>,
   logger: Logger,
 ) => Promise<void>;
 
@@ -59,22 +59,22 @@ export class CustomResource<
   /**
    * Stores function executed when resource creation is requested
    */
-  private createFunction: HandlerFunction;
+  private createFunction: HandlerFunction<T>;
 
   /**
    * Stores function executed when resource update is requested
    */
-  private updateFunction: HandlerFunction;
+  private updateFunction: HandlerFunction<T>;
 
   /**
    * Stores function executed when resource deletion is requested
    */
-  private deleteFunction: HandlerFunction;
+  private deleteFunction: HandlerFunction<T>;
 
   /**
    * The event passed to the Lambda handler
    */
-  public readonly event: Event;
+  public readonly event: Event<T>;
 
   /**
    * The context passed to the Lambda handler
@@ -120,9 +120,9 @@ export class CustomResource<
     event: Event<T>,
     context: Context,
     callback: Callback,
-    createFunction: HandlerFunction,
-    updateFunction: HandlerFunction,
-    deleteFunction: HandlerFunction,
+    createFunction: HandlerFunction<T>,
+    updateFunction: HandlerFunction<T>,
+    deleteFunction: HandlerFunction<T>,
   ) {
     this.event = event;
     this.context = context;
@@ -195,20 +195,26 @@ export class CustomResource<
     this.timeout();
 
     try {
-      let handlerFunction: HandlerFunction;
-      if (this.event.RequestType == 'Create')
-        handlerFunction = this.createFunction;
-      else if (this.event.RequestType == 'Update')
-        handlerFunction = this.updateFunction;
-      else if (this.event.RequestType == 'Delete')
-        handlerFunction = this.deleteFunction;
-      else {
-        this.sendResponse(
-          'FAILED',
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `Unexpected request type: ${this.event.RequestType}`,
-        );
-        return this;
+      let handlerFunction: HandlerFunction<T>;
+      switch (
+        this.event.RequestType // Changed to switch for better readability
+      ) {
+        case 'Create':
+          handlerFunction = this.createFunction;
+          break;
+        case 'Update':
+          handlerFunction = this.updateFunction;
+          break;
+        case 'Delete':
+          handlerFunction = this.deleteFunction;
+          break;
+        default:
+          this.sendResponse(
+            'FAILED',
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            `Unexpected request type: ${this.event.RequestType}`,
+          );
+          return this;
       }
 
       handlerFunction(this, this.logger)
