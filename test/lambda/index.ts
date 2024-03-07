@@ -26,8 +26,14 @@ const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
 const logger = new StandardLogger(LogLevel.debug);
 
-interface ResourceProperties {
-  /** Name of the parameter */
+export interface ResourceProperties {
+  /**
+   * Name of the parameter
+   *
+   * This will automatically be used as the physical resource ID.
+   *
+   * If you your properties do not contain a `name`, you later need to manually set the physical resource ID using `resource.setPhysicalResourceId()`.
+   */
   name: string;
 
   /** Value of the parameter */
