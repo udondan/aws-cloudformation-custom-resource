@@ -53,7 +53,7 @@ export type HandlerFunction<T> = (
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource<T> {
+export class CustomResource<T = Record<string, string>> {
   /**
    * Stores function executed when resource creation is requested
    */
