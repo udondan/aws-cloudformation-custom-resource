@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.0.0...v4.1.0) (2024-03-07)
+
+
+### Features
+
+* CustomResource now accepts a generic type describing resource properties ([#30](https://github.com/udondan/aws-cloudformation-custom-resource/issues/30)) ([2461169](https://github.com/udondan/aws-cloudformation-custom-resource/commit/246116959578efbbacab14cf4aaf709287058636))
+
 ## [4.0.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v3.1.1...v4.0.0) (2024-03-06)
 
 
