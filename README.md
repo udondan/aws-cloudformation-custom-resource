@@ -41,7 +41,7 @@ function createResource(resource: CustomResource, log: Logger): Promise<void> {
     log.log('Hello from create');
 
     // Every custom resource requires a physical ID.
-    // Either you can pass a `Name` parameter to the lambda function
+    // Either you can pass a `name` parameter to the lambda function
     // or you can manually set the ID:
     resource.setPhysicalResourceId('some-physical-resource-id');
 
