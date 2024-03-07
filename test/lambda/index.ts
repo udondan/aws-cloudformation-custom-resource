@@ -26,12 +26,26 @@ const region = 'us-east-1';
 const ssmClient = new SSMClient({ region });
 const logger = new StandardLogger(LogLevel.debug);
 
+export interface ResourceProperties {
+  /**
+   * Name of the parameter
+   *
+   * This will automatically be used as the physical resource ID.
+   *
+   * If you your properties do not contain a `name`, you later need to manually set the physical resource ID using `resource.setPhysicalResourceId()`.
+   */
+  name: string;
+
+  /** Value of the parameter */
+  value: string;
+}
+
 export const handler = function (
-  event: Event,
+  event: Event<ResourceProperties>,
   context: Context,
   callback: Callback,
 ) {
-  const resource = new CustomResource(
+  const resource = new CustomResource<ResourceProperties>(
     event,
     context,
     callback,
@@ -48,12 +62,15 @@ export const handler = function (
   );
 };
 
-function createResource(resource: CustomResource, log: Logger): Promise<void> {
+function createResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.event.ResourceProperties?.name,
-      Value: resource.event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties.name,
+      Value: resource.event.ResourceProperties.value,
       Type: 'String',
       Overwrite: false,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -72,12 +89,15 @@ function createResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function updateResource(resource: CustomResource, log: Logger): Promise<void> {
+function updateResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.event.ResourceProperties?.name,
-      Value: resource.event.ResourceProperties?.value,
+      Name: resource.event.ResourceProperties.name,
+      Value: resource.event.ResourceProperties.value,
       Type: 'String',
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -96,11 +116,14 @@ function updateResource(resource: CustomResource, log: Logger): Promise<void> {
   });
 }
 
-function deleteResource(resource: CustomResource, log: Logger): Promise<void> {
+function deleteResource(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
   return new Promise(function (resolve, reject) {
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Name: resource.event.ResourceProperties?.name,
+      Name: resource.event.ResourceProperties.name,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient

@@ -20,7 +20,10 @@ export interface Context {
 /**
  * The event passed to the Lambda handler
  */
-export type Event = Record<string, unknown> & {
+export type Event<ResourceProperties = Record<string, string>> = Omit<
+  Record<string, unknown>,
+  'ResourceProperties'
+> & {
   /* eslint-disable @typescript-eslint/naming-convention */
   PhysicalResourceId?: string;
   StackId: string;
@@ -28,9 +31,7 @@ export type Event = Record<string, unknown> & {
   LogicalResourceId: string;
   ResponseURL?: string;
   RequestType: 'Create' | 'Update' | 'Delete';
-  ResourceProperties?: Record<string, string> & {
-    name?: string;
-  };
+  ResourceProperties: ResourceProperties;
   /* eslint-enable @typescript-eslint/naming-convention */
 };
 
@@ -44,34 +45,34 @@ type ResponseValue = string;
 /**
  * Function signature
  */
-export type HandlerFunction = (
-  resource: CustomResource,
+export type HandlerFunction<ResourceProperties> = (
+  resource: CustomResource<ResourceProperties>,
   logger: Logger,
 ) => Promise<void>;
 
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource {
+export class CustomResource<ResourceProperties = Record<string, string>> {
   /**
    * Stores function executed when resource creation is requested
    */
-  private createFunction: HandlerFunction;
+  private createFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource update is requested
    */
-  private updateFunction: HandlerFunction;
+  private updateFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource deletion is requested
    */
-  private deleteFunction: HandlerFunction;
+  private deleteFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * The event passed to the Lambda handler
    */
-  public readonly event: Event;
+  public readonly event: Event<ResourceProperties>;
 
   /**
    * The context passed to the Lambda handler
@@ -114,12 +115,12 @@ export class CustomResource {
   private timeoutTimer?: NodeJS.Timeout;
 
   constructor(
-    event: Event,
+    event: Event<ResourceProperties>,
     context: Context,
     callback: Callback,
-    createFunction: HandlerFunction,
-    updateFunction: HandlerFunction,
-    deleteFunction: HandlerFunction,
+    createFunction: HandlerFunction<ResourceProperties>,
+    updateFunction: HandlerFunction<ResourceProperties>,
+    deleteFunction: HandlerFunction<ResourceProperties>,
   ) {
     this.event = event;
     this.context = context;
@@ -192,20 +193,26 @@ export class CustomResource {
     this.timeout();
 
     try {
-      let handlerFunction: HandlerFunction;
-      if (this.event.RequestType == 'Create')
-        handlerFunction = this.createFunction;
-      else if (this.event.RequestType == 'Update')
-        handlerFunction = this.updateFunction;
-      else if (this.event.RequestType == 'Delete')
-        handlerFunction = this.deleteFunction;
-      else {
-        this.sendResponse(
-          'FAILED',
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `Unexpected request type: ${this.event.RequestType}`,
-        );
-        return this;
+      let handlerFunction: HandlerFunction<ResourceProperties>;
+      switch (
+        this.event.RequestType // Changed to switch for better readability
+      ) {
+        case 'Create':
+          handlerFunction = this.createFunction;
+          break;
+        case 'Update':
+          handlerFunction = this.updateFunction;
+          break;
+        case 'Delete':
+          handlerFunction = this.deleteFunction;
+          break;
+        default:
+          this.sendResponse(
+            'FAILED',
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            `Unexpected request type: ${this.event.RequestType}`,
+          );
+          return this;
       }
 
       handlerFunction(this, this.logger)
@@ -281,7 +288,7 @@ export class CustomResource {
       Reason: `${responseData} | ${responseStatus === 'FAILED' ? 'Full error' : 'Details'} in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
-        this.event.ResourceProperties?.name ??
+        (this.event.ResourceProperties as Record<string, string>).name ??
         this.context.logStreamName,
       StackId: this.event.StackId,
       RequestId: this.event.RequestId,

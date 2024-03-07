@@ -11,8 +11,7 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import path = require('path');
-
-export type LambdaProperties = Record<string, string>;
+import { ResourceProperties } from '../lambda';
 
 export class Stack extends CdkStack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -40,7 +39,7 @@ export class Stack extends CdkStack {
       }),
     );
 
-    const resourceProperties: LambdaProperties = {
+    const resourceProperties: ResourceProperties = {
       name: resourceId, // if set, this will be the physical resource ID
       value: new Date().toISOString(), // for testing purpose, we always want to update the parameter
     };
