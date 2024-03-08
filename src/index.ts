@@ -85,6 +85,11 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
   public readonly callback: Callback;
 
   /**
+   * The properties passed to the Lambda function
+   */
+  public readonly properties: ResourceProperties;
+
+  /**
    * Stores values returned to CloudFormation
    */
   private responseData: Record<string, ResponseValue> = {};
@@ -125,6 +130,7 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
     this.event = event;
     this.context = context;
     this.callback = callback;
+    this.properties = event.ResourceProperties;
     this.createFunction = createFunction;
     this.updateFunction = updateFunction;
     this.deleteFunction = deleteFunction;

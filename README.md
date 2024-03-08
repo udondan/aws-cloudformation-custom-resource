@@ -52,7 +52,7 @@ function createResource(
 
     // Every custom resource requires a physical ID.
     // Either you can pass a `name` parameter to the lambda function
-    // (accessed via `resource.event.ResourceProperties.name`)
+    // (accessed via `resource.properties.name`)
     // or you can manually set the ID:
     resource.setPhysicalResourceId('some-physical-resource-id');
 
