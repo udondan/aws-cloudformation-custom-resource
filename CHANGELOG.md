@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.1.0...v4.2.0) (2024-03-08)
+
+
+### Features
+
+* for convenience, expose event.ResourceProperties as resource.properties ([#32](https://github.com/udondan/aws-cloudformation-custom-resource/issues/32)) ([006aaf6](https://github.com/udondan/aws-cloudformation-custom-resource/commit/006aaf6292c0557db9596a36fb9a0d24032639f5))
+
 ## [4.1.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.0.0...v4.1.0) (2024-03-07)
 
 
