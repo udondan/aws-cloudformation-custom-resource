@@ -1,6 +1,6 @@
 # aws-cloudformation-custom-resource
 
-[![npm version](https://badge.fury.io/js/aws-cloudformation-custom-resource.svg)][npm]
+[![npm version](https://img.shields.io/npm/v/aws-cloudformation-custom-resource)][npm]
 [![npm](https://img.shields.io/npm/dt/aws-cloudformation-custom-resource)][npm]
 [![License](https://img.shields.io/github/license/udondan/aws-cloudformation-custom-resource)][license]
 
