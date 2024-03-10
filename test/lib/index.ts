@@ -32,7 +32,11 @@ export class Stack extends CdkStack {
 
     fn.addToRolePolicy(
       new aws_iam.PolicyStatement({
-        actions: ['ssm:PutParameter', 'ssm:DeleteParameter'],
+        actions: [
+          'ssm:PutParameter',
+          'ssm:GetParameter',
+          'ssm:DeleteParameter',
+        ],
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter/${resourceId}`,
         ],
@@ -51,7 +55,6 @@ export class Stack extends CdkStack {
     };
 
     const customResource = new CustomResource(this, resourceId, queryProps);
-
     const parameterVersion = customResource.getAttString('ParameterVersion');
     new CfnOutput(this, 'ParameterVersion', {
       value: parameterVersion,

@@ -2,6 +2,7 @@
 // Of course this does not make much sense, but it is a simple test case and suits as an example of how to use the `aws-cloudformation-custom-resource` package to manage custom resources.
 import {
   DeleteParameterCommand,
+  GetParameterCommand,
   PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm';
@@ -69,8 +70,8 @@ function createResource(
   return new Promise(function (resolve, reject) {
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.properties.name,
-      Value: resource.properties.value,
+      Name: resource.properties.name.value,
+      Value: String(resource.properties.value),
       Type: 'String',
       Overwrite: false,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -94,10 +95,31 @@ function updateResource(
   log: Logger,
 ): Promise<void> {
   return new Promise(function (resolve, reject) {
+    if (!resource.properties.value.changed) {
+      log.info('No update required.');
+      // even though we don't update the parameter, we still need to return the current version, as it is expected as value by our custom resource (getAttString)
+      getParameterVersion(resource.properties.name.value)
+        .then((version) => {
+          if (!version) {
+            reject('Error getting parameter version');
+            return;
+          }
+          resource.addResponseValue('ParameterVersion', String(version));
+          resolve();
+          return;
+        })
+        .catch((error) => {
+          reject(error);
+        });
+      return;
+    }
+    console.info(
+      `Updating parameter ${resource.properties.name.value}: ${resource.properties.value.before} -> ${resource.properties.value.value}`,
+    );
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
-      Name: resource.properties.name,
-      Value: resource.properties.value,
+      Name: resource.properties.name.value.toString(),
+      Value: resource.properties.value.value.valueOf(),
       Type: 'String',
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -121,9 +143,17 @@ function deleteResource(
   log: Logger,
 ): Promise<void> {
   return new Promise(function (resolve, reject) {
+    const parameterName = resource.properties.name.value;
+    if (!parameterName) {
+      // this might happen, when resource creation failed and therefore the physical resource ID is undefined.
+      // even though resource creation fails, CloudFormation still will issue a delete request.
+      log.warn('Parameter name is not defined.');
+      resolve();
+      return;
+    }
     const params: DeleteParameterCommandInput = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      Name: resource.properties.name,
+      Name: parameterName,
     };
     const deleteParameterCommand = new DeleteParameterCommand(params);
     ssmClient
@@ -136,4 +166,29 @@ function deleteResource(
         reject(error);
       });
   });
+}
+
+/**
+ * Retrieves the version of a specific parameter from the SSM Parameter Store.
+ * @param parameterName The name of the parameter.
+ * @returns A Promise that resolves to the version of the parameter.
+ */
+async function getParameterVersion(
+  parameterName: string,
+): Promise<number | false> {
+  try {
+    const command = new GetParameterCommand({
+      /* eslint-disable @typescript-eslint/naming-convention */
+      Name: parameterName,
+      WithDecryption: false,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    });
+
+    const response = await ssmClient.send(command);
+    const version = response.Parameter?.Version;
+    return version ?? false;
+  } catch (error) {
+    console.error('Error getting parameter version:', error);
+    return false;
+  }
 }
