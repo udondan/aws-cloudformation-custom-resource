@@ -84,9 +84,7 @@ function createResource(
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
-      .catch((error) => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }
 
@@ -108,9 +106,7 @@ function updateResource(
           resolve();
           return;
         })
-        .catch((error) => {
-          reject(error);
-        });
+        .catch(reject);
       return;
     }
     console.info(
@@ -132,9 +128,7 @@ function updateResource(
         resource.addResponseValue('ParameterVersion', data.Version!.toString());
         resolve();
       })
-      .catch((error) => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }
 
@@ -162,9 +156,7 @@ function deleteResource(
         log.info('Parameter deleted successfully.');
         resolve();
       })
-      .catch((error) => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }
 
