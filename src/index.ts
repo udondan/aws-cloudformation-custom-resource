@@ -381,7 +381,7 @@ export class CustomResource<
     );
     clearTimeout(this.timeoutTimer);
 
-    this.logger.info(
+    this.logger.debug(
       `Sending response ${responseStatus}:`,
       JSON.stringify(responseData, null, 2),
     );
