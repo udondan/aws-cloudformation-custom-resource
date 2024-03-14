@@ -25,7 +25,6 @@ import {
 
 export interface ResourceProperties {
   name: string;
-  value: string;
 }
 
 export const handler = function (
@@ -59,8 +58,7 @@ function createResource(
     // you can return values from the Lambda function:
     resource.addResponseValue('Foo', 'bar');
 
-    // do stuff
-    resolve();
+    doSomethingWith(resource.properties.name.value).then(resolve).catch(reject);
   });
 }
 
@@ -72,8 +70,13 @@ function updateResource(
   return new Promise(function (resolve, reject) {
     resource.addResponseValue('Foo', 'bar');
 
-    // do stuff
-    resolve();
+    if (resource.properties.name.changed) {
+      doSomethingWith(resource.properties.name.value)
+        .then(resolve)
+        .catch(reject);
+    } else {
+      resolve();
+    }
   });
 }
 

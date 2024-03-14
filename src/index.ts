@@ -18,9 +18,49 @@ export interface Context {
 }
 
 /**
+ * Default resource properties, if user does not provide any via generic
+ */
+type DefaultResourceProperties = Record<string, string>;
+
+interface ResourceProperty<T> {
+  /**
+   * The value of the property
+   */
+  value: T;
+
+  /**
+   * The value of the property before the update
+   *
+   * Only available during a resource update
+   */
+  before?: T;
+
+  /**
+   * Indicates whether the value of the property has changed
+   */
+  changed: boolean;
+
+  /**
+   * Returns the value of the property
+   * @returns The value of the property
+   */
+  toString(): string;
+
+  /**
+   * Returns the value of the property
+   * @returns The value of the property
+   */
+  valueOf(): string;
+}
+
+type CustomResourceProperties<ResourceProperties extends object> = {
+  [P in keyof ResourceProperties]: ResourceProperty<ResourceProperties[P]>;
+};
+
+/**
  * The event passed to the Lambda handler
  */
-export type Event<ResourceProperties = Record<string, string>> = Omit<
+export type Event<ResourceProperties = DefaultResourceProperties> = Omit<
   Record<string, unknown>,
   'ResourceProperties'
 > & {
@@ -32,6 +72,7 @@ export type Event<ResourceProperties = Record<string, string>> = Omit<
   ResponseURL?: string;
   RequestType: 'Create' | 'Update' | 'Delete';
   ResourceProperties: ResourceProperties;
+  OldResourceProperties?: ResourceProperties;
   /* eslint-enable @typescript-eslint/naming-convention */
 };
 
@@ -45,7 +86,7 @@ type ResponseValue = string;
 /**
  * Function signature
  */
-export type HandlerFunction<ResourceProperties> = (
+export type HandlerFunction<ResourceProperties extends object> = (
   resource: CustomResource<ResourceProperties>,
   logger: Logger,
 ) => Promise<void>;
@@ -53,7 +94,9 @@ export type HandlerFunction<ResourceProperties> = (
 /**
  * Custom CloudFormation resource helper
  */
-export class CustomResource<ResourceProperties = Record<string, string>> {
+export class CustomResource<
+  ResourceProperties extends object = DefaultResourceProperties,
+> {
   /**
    * Stores function executed when resource creation is requested
    */
@@ -87,7 +130,7 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
   /**
    * The properties passed to the Lambda function
    */
-  public readonly properties: ResourceProperties;
+  public readonly properties: CustomResourceProperties<ResourceProperties>;
 
   /**
    * Stores values returned to CloudFormation
@@ -130,7 +173,10 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
     this.event = event;
     this.context = context;
     this.callback = callback;
-    this.properties = event.ResourceProperties;
+    this.properties = new Proxy(
+      event.ResourceProperties as CustomResourceProperties<ResourceProperties>,
+      this.propertiesProxyHandler,
+    );
     this.createFunction = createFunction;
     this.updateFunction = updateFunction;
     this.deleteFunction = deleteFunction;
@@ -142,6 +188,59 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
       this.handle();
     });
   }
+
+  /**
+   * Proxy handler for ResourceProperties
+   */
+  private propertiesProxyHandler: ProxyHandler<
+    CustomResourceProperties<ResourceProperties>
+  > = {
+    get: (
+      target: CustomResourceProperties<ResourceProperties>,
+      propertyKey: string | symbol,
+    ) => {
+      if (typeof propertyKey === 'symbol') {
+        return undefined; // Symbols are not supported as property keys
+      }
+
+      // Return another proxy for the given property key to handle value, changed, and before.
+      return new Proxy(
+        { key: propertyKey },
+        {
+          get: (_, property: string | symbol) => {
+            if (property === 'value') {
+              return target[propertyKey as keyof ResourceProperties];
+            }
+
+            if (property === 'toString' || property === 'valueOf') {
+              return () => target[propertyKey as keyof ResourceProperties];
+            }
+
+            if (property === 'changed') {
+              const before =
+                this.event.OldResourceProperties?.[
+                  propertyKey as keyof ResourceProperties
+                ];
+              const newValue = target[propertyKey as keyof ResourceProperties];
+              const changed =
+                JSON.stringify(before) !== JSON.stringify(newValue);
+              return changed;
+            }
+
+            // When '.before' is accessed, return the old value.
+            if (property === 'before') {
+              return this.event.OldResourceProperties?.[
+                propertyKey as keyof ResourceProperties
+              ];
+            }
+
+            // Fallback handler for other properties on the second-level proxy.
+            return undefined;
+          },
+        },
+      );
+    },
+  };
 
   /**
    * Adds values to the response returned to CloudFormation
@@ -190,12 +289,12 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
   /**
    * Handles the Lambda event
    */
-  private handle(): this {
+  private handle() {
     if (typeof this.event.ResponseURL === 'undefined') {
       throw new Error('ResponseURL missing');
     }
 
-    this.logger.debug('REQUEST RECEIVED:', JSON.stringify(this.event));
+    this.logger.info('REQUEST RECEIVED:', JSON.stringify(this.event));
     this.timeout();
 
     try {
@@ -218,7 +317,7 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `Unexpected request type: ${this.event.RequestType}`,
           );
-          return this;
+          return;
       }
 
       handlerFunction(this, this.logger)
@@ -234,7 +333,6 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
     } catch (err) {
       this.handleError(err);
     }
-    return this;
   }
 
   private handleError(err: unknown) {
@@ -294,7 +392,7 @@ export class CustomResource<ResourceProperties = Record<string, string>> {
       Reason: `${responseData} | ${responseStatus === 'FAILED' ? 'Full error' : 'Details'} in CloudWatch ${this.context.logStreamName}`,
       PhysicalResourceId:
         this.physicalResourceId ??
-        (this.event.ResourceProperties as Record<string, string>).name ??
+        (this.event.ResourceProperties as DefaultResourceProperties).name ??
         this.context.logStreamName,
       StackId: this.event.StackId,
       RequestId: this.event.RequestId,
