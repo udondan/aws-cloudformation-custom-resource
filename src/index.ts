@@ -419,7 +419,7 @@ export class CustomResource<
       },
     };
 
-    this.logger.debug(
+    this.logger.info(
       'SENDING RESPONSE...',
       JSON.stringify({ options, body }, null, 2),
     );
