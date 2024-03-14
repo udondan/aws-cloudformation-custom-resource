@@ -224,7 +224,9 @@ export class CustomResource<
                   propertyKey as keyof ResourceProperties
                 ];
               const newValue = target[propertyKey as keyof ResourceProperties];
-              return JSON.stringify(before) !== JSON.stringify(newValue);
+              const changed =
+                JSON.stringify(before) !== JSON.stringify(newValue);
+              return changed;
             }
 
             // When '.before' is accessed, return the old value.

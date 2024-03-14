@@ -5,6 +5,9 @@ import {
   GetParameterCommand,
   PutParameterCommand,
   SSMClient,
+  AddTagsToResourceCommand,
+  AddTagsToResourceCommandInput,
+  RemoveTagsFromResourceCommand,
 } from '@aws-sdk/client-ssm';
 import {
   CustomResource,
@@ -15,6 +18,8 @@ import {
 import type {
   DeleteParameterCommandInput,
   PutParameterCommandInput,
+  RemoveTagsFromResourceCommandInput,
+  Tag,
 } from '@aws-sdk/client-ssm';
 import type {
   Event,
@@ -33,12 +38,14 @@ export interface ResourceProperties {
    *
    * This will automatically be used as the physical resource ID.
    *
-   * If you your properties do not contain a `name`, you later need to manually set the physical resource ID using `resource.setPhysicalResourceId()`.
+   * If your properties do not contain a `name`, you later need to manually set the physical resource ID using `resource.setPhysicalResourceId()`.
    */
-  name: string;
+  readonly name: string;
 
   /** Value of the parameter */
-  value: string;
+  readonly value: string;
+
+  readonly tags?: Record<string, string>;
 }
 
 export const handler = function (
@@ -74,6 +81,7 @@ function createResource(
       Value: String(resource.properties.value),
       Type: 'String',
       Overwrite: false,
+      Tags: makeTags(resource.properties.tags?.value),
       /* eslint-enable @typescript-eslint/naming-convention */
     };
     const putParameterCommand = new PutParameterCommand(params);
@@ -88,30 +96,27 @@ function createResource(
   });
 }
 
-function updateResource(
+async function updateResource(
   resource: CustomResource<ResourceProperties>,
   log: Logger,
 ): Promise<void> {
-  return new Promise(function (resolve, reject) {
-    if (!resource.properties.value.changed) {
-      log.info('No update required.');
-      // even though we don't update the parameter, we still need to return the current version, as it is expected as value by our custom resource (getAttString)
-      getParameterVersion(resource.properties.name.value)
-        .then((version) => {
-          if (!version) {
-            reject('Error getting parameter version');
-            return;
-          }
-          resource.addResponseValue('ParameterVersion', String(version));
-          resolve();
-          return;
-        })
-        .catch(reject);
-      return;
-    }
-    console.info(
-      `Updating parameter ${resource.properties.name.value}: ${resource.properties.value.before} -> ${resource.properties.value.value}`,
+  if (!resource.properties.value.changed) {
+    log.info('No update of parameter value required');
+
+    const version = await getParameterVersion(
+      resource.properties.name.value,
+      log,
     );
+    if (!version) {
+      throw new Error('Error getting parameter version');
+    }
+
+    resource.addResponseValue('ParameterVersion', String(version));
+  } else {
+    log.info(
+      `Updating parameter ${resource.properties.name.value} value: ${resource.properties.value.before} -> ${resource.properties.value.value}`,
+    );
+
     const params: PutParameterCommandInput = {
       /* eslint-disable @typescript-eslint/naming-convention */
       Name: resource.properties.name.value.toString(),
@@ -120,16 +125,26 @@ function updateResource(
       Overwrite: true,
       /* eslint-enable @typescript-eslint/naming-convention */
     };
+
     const putParameterCommand = new PutParameterCommand(params);
-    ssmClient
-      .send(putParameterCommand)
-      .then((data) => {
-        log.info('Parameter updated successfully.');
-        resource.addResponseValue('ParameterVersion', data.Version!.toString());
-        resolve();
-      })
-      .catch(reject);
-  });
+    const data = await ssmClient.send(putParameterCommand);
+
+    log.info('Parameter updated successfully.');
+    resource.addResponseValue('ParameterVersion', data.Version!.toString());
+  }
+  if (resource.properties.tags?.changed) {
+    log.debug(
+      'Tags have changed:',
+      resource.properties.tags?.value,
+      resource.properties.tags?.before,
+    );
+    await Promise.all([
+      updateParameterAddTags(resource, log),
+      updateParameterRemoveTags(resource, log),
+    ]);
+  } else {
+    log.debug('No tag changes detected');
+  }
 }
 
 function deleteResource(
@@ -149,12 +164,23 @@ function deleteResource(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       Name: parameterName,
     };
-    const deleteParameterCommand = new DeleteParameterCommand(params);
-    ssmClient
-      .send(deleteParameterCommand)
-      .then((_data) => {
-        log.info('Parameter deleted successfully.');
-        resolve();
+    getParameterVersion(parameterName, log)
+      .then((version) => {
+        if (!version) {
+          log.warn(
+            `Parameter ${parameterName} does not exist. Nothing to delete.`,
+          );
+          resolve();
+          return;
+        }
+        const deleteParameterCommand = new DeleteParameterCommand(params);
+        ssmClient
+          .send(deleteParameterCommand)
+          .then((_data) => {
+            log.info(`Parameter ${parameterName} deleted successfully`);
+            resolve();
+          })
+          .catch(reject);
       })
       .catch(reject);
   });
@@ -167,6 +193,7 @@ function deleteResource(
  */
 async function getParameterVersion(
   parameterName: string,
+  log: Logger,
 ): Promise<number | false> {
   try {
     const command = new GetParameterCommand({
@@ -180,7 +207,109 @@ async function getParameterVersion(
     const version = response.Parameter?.Version;
     return version ?? false;
   } catch (error) {
-    console.error('Error getting parameter version:', error);
+    log.error('Error getting parameter version:', error);
     return false;
   }
+}
+
+function makeTags(eventTags?: Record<string, string>): Tag[] {
+  return eventTags
+    ? Object.entries(eventTags).map(([key, value]) => ({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        Key: key,
+        Value: value,
+        /* eslint-enable @typescript-eslint/naming-convention */
+      }))
+    : [];
+}
+
+function getMissingTags(oldTags: Tag[], newTags: Tag[]): string[] {
+  const missing = oldTags.filter(missingTags(newTags));
+  return missing.map(function (tag: Tag) {
+    return tag.Key!;
+  });
+}
+
+function missingTags(newTags: Tag[]) {
+  return (currentTag: Tag) => {
+    return (
+      newTags.filter((newTag: Tag) => {
+        return newTag.Key == currentTag.Key;
+      }).length == 0
+    );
+  };
+}
+
+function updateParameterAddTags(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
+  const parameter = resource.properties.name.value;
+  log.info(`Attempting to update tags for parameter ${parameter}`);
+  return new Promise(function (resolve, reject) {
+    const oldTags = makeTags(resource.properties.tags?.before);
+    const newTags = makeTags(resource.properties.tags?.value);
+    if (JSON.stringify(oldTags) == JSON.stringify(newTags)) {
+      log.info(
+        `No changes of tags detected for parameter ${parameter}. Not attempting any update`,
+      );
+      return resolve();
+    }
+    const params: AddTagsToResourceCommandInput = {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      ResourceType: 'Parameter',
+      ResourceId: parameter,
+      Tags: newTags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    };
+    log.debug(`AddTagsToResourceCommandInput: ${JSON.stringify(params)}`);
+    ssmClient
+      .send(new AddTagsToResourceCommand(params))
+      .then((_data) => {
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+
+function updateParameterRemoveTags(
+  resource: CustomResource<ResourceProperties>,
+  log: Logger,
+): Promise<void> {
+  const parameter = resource.properties.name.value;
+  log.info(`Attempting to remove some tags for parameter ${parameter}`);
+  return new Promise(function (resolve, reject) {
+    const oldTags = makeTags(resource.properties.tags?.before);
+    const newTags = makeTags(resource.properties.tags?.value);
+    const tagsToRemove = getMissingTags(oldTags, newTags);
+    if (
+      JSON.stringify(oldTags) == JSON.stringify(newTags) ||
+      !tagsToRemove.length
+    ) {
+      log.info(
+        `No changes of tags detected for parameter ${parameter}. Not attempting any update`,
+      );
+      return resolve();
+    }
+
+    log.info(`Will remove the following tags: ${JSON.stringify(tagsToRemove)}`);
+    const params: RemoveTagsFromResourceCommandInput = {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      ResourceType: 'Parameter',
+      ResourceId: parameter,
+      TagKeys: tagsToRemove,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    };
+    log.debug(`RemoveTagsFromResourceCommandInput: ${JSON.stringify(params)}`);
+    ssmClient
+      .send(new RemoveTagsFromResourceCommand(params))
+      .then((_data) => {
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
 }
