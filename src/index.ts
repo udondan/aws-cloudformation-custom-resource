@@ -20,9 +20,7 @@ export interface Context {
 /**
  * Default resource properties, if user does not provide any via generic
  */
-type DefaultResourceProperties = Record<string, string> & {
-  tags?: Record<string, string>;
-};
+type DefaultResourceProperties = Record<string, string>;
 
 interface ResourceProperty<T> {
   /**
