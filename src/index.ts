@@ -296,7 +296,7 @@ export class CustomResource<
       throw new Error('ResponseURL missing');
     }
 
-    this.logger.debug('REQUEST RECEIVED:', JSON.stringify(this.event));
+    this.logger.info('REQUEST RECEIVED:', JSON.stringify(this.event));
     this.timeout();
 
     try {
@@ -383,7 +383,7 @@ export class CustomResource<
     );
     clearTimeout(this.timeoutTimer);
 
-    this.logger.debug(
+    this.logger.info(
       `Sending response ${responseStatus}:`,
       JSON.stringify(responseData, null, 2),
     );
