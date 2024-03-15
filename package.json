@@ -1,6 +1,6 @@
 {
   "name": "aws-cloudformation-custom-resource",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "description": "Helper for managing custom AWS CloudFormation resources in a Lambda function",
   "main": "src/index.js",
   "types": "src/index.d.ts",

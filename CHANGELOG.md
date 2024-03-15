@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.2.0...v5.0.0) (2024-03-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* implements proxy to easily get the changed state and previous value in update requests ([#41](https://github.com/udondan/aws-cloudformation-custom-resource/issues/41))
+
+### Features
+
+* implements proxy to easily get the changed state and previous value in update requests ([#41](https://github.com/udondan/aws-cloudformation-custom-resource/issues/41)) ([26fdf79](https://github.com/udondan/aws-cloudformation-custom-resource/commit/26fdf793ab4ef24cbfbefe35b683980f1bc4efe2))
+
 ## [4.2.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.1.0...v4.2.0) (2024-03-08)
 
 
