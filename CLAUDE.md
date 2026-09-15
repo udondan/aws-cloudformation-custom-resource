@@ -41,4 +41,5 @@ A separate npm project with its own `package.json`/lockfile and its own `Makefil
 
 - Commits and PR titles must follow Conventional Commits (enforced on PR titles by CI). Releases are automated with release-please (`CHANGELOG.md`, `.release-please-manifest.json`), so don't bump versions by hand.
 - ESLint enforces `@typescript-eslint/naming-convention`. AWS/CloudFormation PascalCase keys are wrapped in `/* eslint-disable @typescript-eslint/naming-convention */` blocks. Unused variables must start with `_`. Use template literals instead of string concatenation (`prefer-template`).
-- Dependencies are updated by Renovate.
+- Dependencies are updated by Renovate. `renovate.json` overrides `ignorePaths` (the `config:recommended` default skips `**/test/**`) and turns off the PR concurrency limit, so the `test/` app gets updates too.
+- Actions maintained by GitHub (`actions/*`) are referenced by major version. All other actions are pinned to an exact version tag.
