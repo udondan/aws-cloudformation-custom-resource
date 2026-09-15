@@ -22,8 +22,7 @@ const resourceType = 'Custom::Parameter';
  */
 
 export interface ParameterProps
-  extends ResourceProps,
-    Omit<ResourceProperties, 'tags'> {}
+  extends ResourceProps, Omit<ResourceProperties, 'tags'> {}
 
 /**
  * An EC2 Key Pair
