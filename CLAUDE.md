@@ -12,7 +12,7 @@ The Makefile is the entry point. `npm run build` just calls `make build`.
 
 - `make install`: `npm clean-install` using the local `.npm` cache
 - `make build`: install, delete all emitted `*.js`/`*.d.ts` outside `node_modules`, then run `npx tsc`
-- `make eslint`: run `npx eslint .` (type-checked rules plus Prettier, see `.eslintrc`)
+- `make eslint`: run `npx eslint .` (type-checked rules plus Prettier, see `eslint.config.mjs`)
 - `make test`: **integration test against real AWS** (needs credentials, region `us-east-1`). It installs nothing itself, so run `make install` and `cd test && make install` first. It builds the CDK app in `test/`, deploys it twice, checks that the SSM parameter `CustomResourceTestParameter` is at version 2 (the second deploy must run the Update path), then destroys the stack.
 - `make publish`: compile with `tsconfig.publish.json`, run `npm publish --dry-run`, and assert the package contains exactly 5 files, including `src/index.js` and `src/index.d.ts`. It only really publishes when `GITHUB_EVENT` is set and isn't `pull_request`.
 - `cd test && make diff|deploy|DESTROY`: individual CDK steps

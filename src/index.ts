@@ -1,4 +1,4 @@
-import https = require('https');
+import * as https from 'https';
 
 export type Callback<TResult = unknown> = (
   error?: Error | string | null,

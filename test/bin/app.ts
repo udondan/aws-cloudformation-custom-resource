@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import cdk = require('aws-cdk-lib');
+import * as cdk from 'aws-cdk-lib';
 
 import { Stack } from '../lib';
 
