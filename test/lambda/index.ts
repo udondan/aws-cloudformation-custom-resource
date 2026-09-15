@@ -268,7 +268,7 @@ function updateParameterAddTags(
       .then((_data) => {
         resolve();
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         reject(err);
       });
   });
@@ -308,7 +308,7 @@ function updateParameterRemoveTags(
       .then((_data) => {
         resolve();
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         reject(err);
       });
   });
