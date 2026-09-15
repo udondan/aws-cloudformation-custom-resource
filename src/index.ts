@@ -6,7 +6,10 @@ export type Callback<TResult = unknown> = (
 ) => void;
 
 export interface Context {
-  callbackWaitsForEmptyEventLoop: boolean;
+  /**
+   * Not available in the Node.js 24 runtime and later
+   */
+  callbackWaitsForEmptyEventLoop?: boolean;
   functionName: string;
   functionVersion: string;
   invokedFunctionArn: string;
@@ -124,8 +127,10 @@ export class CustomResource<
 
   /**
    * The callback function passed to the Lambda handler
+   *
+   * Undefined when the resource is used from an async handler
    */
-  public readonly callback: Callback;
+  public readonly callback?: Callback;
 
   /**
    * The properties passed to the Lambda function
@@ -162,24 +167,78 @@ export class CustomResource<
    */
   private timeoutTimer?: NodeJS.Timeout;
 
+  /**
+   * Settles once the response was sent to CloudFormation
+   */
+  private readonly completion: Promise<void>;
+  private resolveCompletion!: () => void;
+  private rejectCompletion!: (error: Error) => void;
+
+  /**
+   * Creates a custom resource for an async Lambda handler.
+   *
+   * Return `resource.done()` from the handler. Required for the Node.js 24 runtime and later, which no longer supports callback handlers.
+   */
   constructor(
     event: Event<ResourceProperties>,
     context: Context,
-    callback: Callback,
     createFunction: HandlerFunction<ResourceProperties>,
     updateFunction: HandlerFunction<ResourceProperties>,
     deleteFunction: HandlerFunction<ResourceProperties>,
+  );
+
+  /**
+   * Creates a custom resource for a callback-based Lambda handler.
+   *
+   * Only supported by the Node.js 22 runtime and earlier.
+   */
+  constructor(
+    event: Event<ResourceProperties>,
+    context: Context,
+    callback: Callback | undefined,
+    createFunction: HandlerFunction<ResourceProperties>,
+    updateFunction: HandlerFunction<ResourceProperties>,
+    deleteFunction: HandlerFunction<ResourceProperties>,
+  );
+
+  constructor(
+    event: Event<ResourceProperties>,
+    context: Context,
+    ...args:
+      | [
+          HandlerFunction<ResourceProperties>,
+          HandlerFunction<ResourceProperties>,
+          HandlerFunction<ResourceProperties>,
+        ]
+      | [
+          Callback | undefined,
+          HandlerFunction<ResourceProperties>,
+          HandlerFunction<ResourceProperties>,
+          HandlerFunction<ResourceProperties>,
+        ]
   ) {
     this.event = event;
     this.context = context;
-    this.callback = callback;
+    if (args.length === 4) {
+      [
+        this.callback,
+        this.createFunction,
+        this.updateFunction,
+        this.deleteFunction,
+      ] = args;
+    } else {
+      [this.createFunction, this.updateFunction, this.deleteFunction] = args;
+    }
     this.properties = new Proxy(
       event.ResourceProperties as CustomResourceProperties<ResourceProperties>,
       this.propertiesProxyHandler,
     );
-    this.createFunction = createFunction;
-    this.updateFunction = updateFunction;
-    this.deleteFunction = deleteFunction;
+    this.completion = new Promise<void>((resolve, reject) => {
+      this.resolveCompletion = resolve;
+      this.rejectCompletion = reject;
+    });
+    // callback-based handlers never await the completion, so a rejection must not become an unhandled rejection
+    this.completion.catch(() => undefined);
     this.logger = new StandardLogger();
     if (this.event.PhysicalResourceId) {
       this.setPhysicalResourceId(this.event.PhysicalResourceId);
@@ -287,11 +346,25 @@ export class CustomResource<
   }
 
   /**
+   * Returns a promise that resolves once the response was sent to CloudFormation.
+   *
+   * Return or await it in an async Lambda handler. It also resolves when a FAILED response was sent. It only rejects when the response could not be sent.
+   */
+  done(): Promise<void> {
+    return this.completion;
+  }
+
+  /**
    * Handles the Lambda event
    */
   private handle() {
     if (typeof this.event.ResponseURL === 'undefined') {
-      throw new Error('ResponseURL missing');
+      const error = new Error('ResponseURL missing');
+      this.rejectCompletion(error);
+      if (this.callback) {
+        throw error;
+      }
+      return;
     }
 
     this.logger.info('REQUEST RECEIVED:', JSON.stringify(this.event));
@@ -358,7 +431,7 @@ export class CustomResource<
     const handler = () => {
       this.logger.error('Timeout FAILURE!');
       new Promise(() => this.sendResponse('FAILED', 'Function timed out'))
-        .then(() => this.callback(new Error('Function timed out')))
+        .then(() => this.callback?.(new Error('Function timed out')))
         .catch((err: unknown) => {
           this.handleError(err);
         });
@@ -429,12 +502,14 @@ export class CustomResource<
         status: response.statusCode,
         headers: response.headers,
       });
-      this.callback(null, 'done');
+      this.resolveCompletion();
+      this.callback?.(null, 'done');
     });
 
     request.on('error', (error) => {
       this.logger.error('sendResponse Error:', JSON.stringify(error));
-      this.callback(error);
+      this.rejectCompletion(error);
+      this.callback?.(error);
     });
 
     request.write(bodyString);

@@ -23,7 +23,6 @@ import type {
 } from '@aws-sdk/client-ssm';
 import type {
   Event,
-  Callback,
   Context,
   Logger,
 } from 'aws-cloudformation-custom-resource';
@@ -48,15 +47,13 @@ export interface ResourceProperties {
   readonly tags?: Record<string, string>;
 }
 
-export const handler = function (
+export const handler = async function (
   event: Event<ResourceProperties>,
   context: Context,
-  callback: Callback,
-) {
+): Promise<void> {
   const resource = new CustomResource<ResourceProperties>(
     event,
     context,
-    callback,
     createResource,
     updateResource,
     deleteResource,
@@ -68,6 +65,8 @@ export const handler = function (
   logger.debug(
     `Physical resource ID: ${resource.getPhysicalResourceId() ?? 'undefined'}`,
   );
+
+  return resource.done();
 };
 
 function createResource(
