@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.0.0...v5.1.0) (2026-09-16)
+
+
+### Features
+
+* support Node.js 24 (async Lambda handlers), modernize CI and fix renovate config ([#331](https://github.com/udondan/aws-cloudformation-custom-resource/issues/331)) ([178fee3](https://github.com/udondan/aws-cloudformation-custom-resource/commit/178fee30fd08c042268cdc35ecfd2633f01970cb))
+
 ## [5.0.0](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v4.2.0...v5.0.0) (2024-03-15)
 
 
