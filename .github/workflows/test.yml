@@ -57,6 +57,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Test building package
-        run: make publish
-        env:
-          GITHUB_EVENT: ${{ github.event_name }}
+        run: make package
