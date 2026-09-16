@@ -6,7 +6,7 @@ ERROR_COLOR=\033[0;31m
 
 PARAMETER_NAME=CustomResourceTestParameter
 
-.PHONY: test
+.PHONY: test package publish
 
 install:
 	@echo -e "$(TARGET_COLOR)Running install$(NO_COLOR)"
@@ -33,8 +33,8 @@ test:
 	fi && \
 	$(MAKE) DESTROY
 
-publish: install
-	@echo -e "$(TARGET_COLOR)Running publish$(NO_COLOR)"
+package: install
+	@echo -e "$(TARGET_COLOR)Running package$(NO_COLOR)"
 	@npx tsc -p tsconfig.publish.json
 	@npm pack --dry-run 2>&1 | tee publish_output.txt
 	@if ! grep -q "src/index.js" publish_output.txt; then \
@@ -51,9 +51,10 @@ publish: install
 		exit 1; \
 	fi
 	@rm publish_output.txt
-	@if [[ -n "$${GITHUB_EVENT:-}" && "$${GITHUB_EVENT}" != "pull_request" ]]; then \
-		npm publish; \
-	fi
+
+publish: package
+	@echo -e "$(TARGET_COLOR)Running publish$(NO_COLOR)"
+	@npm publish
 
 eslint:
 	@echo -e "$(TARGET_COLOR)Running eslint $$(npx eslint --version)$(NO_COLOR)"

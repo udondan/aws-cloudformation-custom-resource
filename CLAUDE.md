@@ -14,14 +14,15 @@ The Makefile is the entry point. `npm run build` just calls `make build`.
 - `make build`: install, delete all emitted `*.js`/`*.d.ts` outside `node_modules`, then run `npx tsc`
 - `make eslint`: run `npx eslint .` (type-checked rules plus Prettier, see `eslint.config.mjs`)
 - `make test`: **integration test against real AWS** (needs credentials, region `us-east-1`). It installs nothing itself, so run `make install` and `cd test && make install` first. It builds the CDK app in `test/`, deploys it twice, checks that the SSM parameter `CustomResourceTestParameter` is at version 2 (the second deploy must run the Update path), then destroys the stack.
-- `make publish`: compile with `tsconfig.publish.json`, run `npm publish --dry-run`, and assert the package contains exactly 5 files, including `src/index.js` and `src/index.d.ts`. It only really publishes when `GITHUB_EVENT` is set and isn't `pull_request`.
+- `make package`: compile with `tsconfig.publish.json`, run `npm pack --dry-run`, and assert the package contains exactly 5 files, including `src/index.js` and `src/index.d.ts`. Publishes nothing, so it is safe to run locally.
+- `make publish`: run `make package`, then `npm publish` — **unconditionally**. Don't run this locally. It is only invoked by the `publish` job in `.github/workflows/publish.yml`, which is skipped on pull requests and gated behind the `npm` GitHub Environment. That job authenticates via npm trusted publishing (OIDC, `id-token: write`); there is no npm token.
 - `cd test && make diff|deploy|DESTROY`: individual CDK steps
 
-There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make publish` on PRs.
+There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make package` on PRs.
 
 ## Build output
 
-`tsc` has no `outDir`. `.js` and `.d.ts` files are written next to the `.ts` sources and are gitignored. `package.json` `main`/`types` point to `src/index.js`/`src/index.d.ts`. `.npmignore` ignores everything except `*.js`/`*.d.ts` and excludes `test`. **Adding another source file to the package changes the file count and breaks the `make publish` check** (the Makefile expects exactly 5 files).
+`tsc` has no `outDir`. `.js` and `.d.ts` files are written next to the `.ts` sources and are gitignored. `package.json` `main`/`types` point to `src/index.js`/`src/index.d.ts`. `.npmignore` ignores everything except `*.js`/`*.d.ts` and excludes `test`. **Adding another source file to the package changes the file count and breaks the `make package` check** (the Makefile expects exactly 5 files).
 
 ## Architecture (`src/index.ts`)
 
