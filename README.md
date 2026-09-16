@@ -16,7 +16,6 @@ Basic usage:
 
 ```typescript
 import {
-  Callback,
   Context,
   CustomResource,
   Event,
@@ -27,19 +26,20 @@ export interface ResourceProperties {
   name: string;
 }
 
-export const handler = function (
+export const handler = async function (
   event: Event<ResourceProperties>,
   context: Context,
-  callback: Callback,
-) {
-  new CustomResource<ResourceProperties>(
+): Promise<void> {
+  const resource = new CustomResource<ResourceProperties>(
     event,
     context,
-    callback,
     createResource,
     updateResource,
     deleteResource,
   );
+
+  // resolves once the response was sent to CloudFormation
+  return resource.done();
 };
 
 function createResource(
@@ -92,14 +92,30 @@ function deleteResource(
 }
 ```
 
+The Node.js 24 Lambda runtime and later only support async handlers. On older runtimes you can still use a callback-based handler by passing the callback as the third argument:
+
+```typescript
+export const handler = function (
+  event: Event<ResourceProperties>,
+  context: Context,
+  callback: Callback,
+) {
+  new CustomResource<ResourceProperties>(
+    event,
+    context,
+    callback,
+    createResource,
+    updateResource,
+    deleteResource,
+  );
+};
+```
+
 By default only errors are logged. You can change the log level or use another logging library:
 
 ```typescript
 import {
-  Callback,
-  Context,
   CustomResource,
-  Event,
   LogLevel,
   StandardLogger,
 } from 'aws-cloudformation-custom-resource';
@@ -109,7 +125,6 @@ const logger = new StandardLogger(LogLevel.debug);
 const resource = new CustomResource(
   event,
   context,
-  callback,
   createResource,
   updateResource,
   deleteResource,

@@ -36,7 +36,7 @@ test:
 publish: install
 	@echo -e "$(TARGET_COLOR)Running publish$(NO_COLOR)"
 	@npx tsc -p tsconfig.publish.json
-	@npm publish --dry-run 2>&1 | tee publish_output.txt
+	@npm pack --dry-run 2>&1 | tee publish_output.txt
 	@if ! grep -q "src/index.js" publish_output.txt; then \
 		echo "❌ src/index.js is NOT included in the package"; \
 		exit 1; \

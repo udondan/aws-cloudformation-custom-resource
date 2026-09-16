@@ -52,7 +52,7 @@ export class Parameter extends Construct implements ITaggable {
     this.lambda = new aws_lambda_nodejs.NodejsFunction(this, lambdaName, {
       entry: path.join(__dirname, '../lambda/index.ts'),
       functionName: lambdaName,
-      runtime: aws_lambda.Runtime.NODEJS_20_X,
+      runtime: aws_lambda.Runtime.NODEJS_24_X,
       description: 'Testing custom CFN resources',
       logRetention: 3,
       timeout: Duration.seconds(30),
