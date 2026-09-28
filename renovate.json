@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":semanticCommitTypeAll(chore)"],
+  "mode": "full",
   "ignorePaths": ["**/node_modules/**"],
   "prConcurrentLimit": 0,
   "packageRules": [
