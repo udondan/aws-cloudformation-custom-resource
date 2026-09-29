@@ -1,16 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommitTypeAll(chore)"],
-  "mode": "full",
-  "semanticCommits": "enabled",
-  "labels": ["renovate"],
-  "ignorePaths": ["**/node_modules/**"],
+  "extends": ["github>udondan/renovate-config"],
+  "minimumReleaseAge": null,
+  "automerge": false,
+  "rebaseWhen": "auto",
   "prConcurrentLimit": 0,
+  "ignorePaths": ["**/node_modules/**"],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     }
-  ],
-  "rebaseWhen": "auto"
+  ]
 }
