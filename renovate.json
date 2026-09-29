@@ -3,6 +3,7 @@
   "extends": ["config:recommended", ":semanticCommitTypeAll(chore)"],
   "mode": "full",
   "semanticCommits": "enabled",
+  "labels": ["renovate"],
   "ignorePaths": ["**/node_modules/**"],
   "prConcurrentLimit": 0,
   "packageRules": [
