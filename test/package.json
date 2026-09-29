@@ -10,7 +10,7 @@
     "@swc/helpers": "^0.5.6",
     "@types/js-yaml": "4.0.9",
     "@types/node": "24.19.0",
-    "aws-cdk": "2.1141.0",
+    "aws-cdk": "2.1143.0",
     "esbuild": "0.20.1",
     "regenerator-runtime": "^0.14.1",
     "ts-node": "10.9.2",
