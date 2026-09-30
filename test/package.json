@@ -14,7 +14,7 @@
     "esbuild": "0.28.2",
     "regenerator-runtime": "^0.14.1",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.525.0",
