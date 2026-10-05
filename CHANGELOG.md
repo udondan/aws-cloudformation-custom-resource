@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.2](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.1...v5.1.2) (2026-09-30)
+
+
+### Dependencies
+
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1143.0 ([#354](https://github.com/udondan/aws-cloudformation-custom-resource/issues/354)) ([e778ba7](https://github.com/udondan/aws-cloudformation-custom-resource/commit/e778ba726ad75f4ad7b6ad60cac3d7c031392e43))
+
 ## [5.1.1](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.0...v5.1.1) (2026-09-29)
 
 
