@@ -6,7 +6,7 @@
     "cdk": "npx cdk"
   },
   "devDependencies": {
-    "@swc/core": "1.16.13",
+    "@swc/core": "1.16.18",
     "@swc/helpers": "0.5.23",
     "@types/js-yaml": "4.0.9",
     "@types/node": "24.19.2",
