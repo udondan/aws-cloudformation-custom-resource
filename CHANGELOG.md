@@ -1,5 +1,26 @@
 # Changelog
 
+## [5.1.3](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.2...v5.1.3) (2026-10-19)
+
+
+### Dependencies
+
+* **deps:** lock file maintenance ([#375](https://github.com/udondan/aws-cloudformation-custom-resource/issues/375)) ([27ab5cd](https://github.com/udondan/aws-cloudformation-custom-resource/commit/27ab5cdf6d45dd393d2c43cec67a7a5403cf0afb))
+* **deps:** pin dependencies ([#360](https://github.com/udondan/aws-cloudformation-custom-resource/issues/360)) ([610667b](https://github.com/udondan/aws-cloudformation-custom-resource/commit/610667b4e7fc760b01c6c431529e20f7aafc3655))
+* **deps:** update dependency @aws-sdk/client-ssm to ^3.1143.0 ([#363](https://github.com/udondan/aws-cloudformation-custom-resource/issues/363)) ([0b39a28](https://github.com/udondan/aws-cloudformation-custom-resource/commit/0b39a28a461fff3dbf259c5b69b80c7d0e824a04))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1150.0 ([#371](https://github.com/udondan/aws-cloudformation-custom-resource/issues/371)) ([29acdef](https://github.com/udondan/aws-cloudformation-custom-resource/commit/29acdefc88a4af4f22b2a426e31b14f32d3b14ae))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1151.0 ([#373](https://github.com/udondan/aws-cloudformation-custom-resource/issues/373)) ([0f50609](https://github.com/udondan/aws-cloudformation-custom-resource/commit/0f506099f532221c36d869fcc7b9d1369a7b4291))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1152.0 ([#374](https://github.com/udondan/aws-cloudformation-custom-resource/issues/374)) ([eb924b4](https://github.com/udondan/aws-cloudformation-custom-resource/commit/eb924b429b4ecc3ccdb5f27c9a413cf7f96ba5b6))
+* **deps:** update dependency @swc/core to ^1.16.12 ([#361](https://github.com/udondan/aws-cloudformation-custom-resource/issues/361)) ([175f793](https://github.com/udondan/aws-cloudformation-custom-resource/commit/175f7930b3799efcae9a064522e0c0b6417dd6ee))
+* **deps:** update dependency @swc/core to v1.16.18 ([#369](https://github.com/udondan/aws-cloudformation-custom-resource/issues/369)) ([f589e95](https://github.com/udondan/aws-cloudformation-custom-resource/commit/f589e952eb4fe3f69f85e1b6f19ad3b8118b8a81))
+* **deps:** update dependency @types/node to v24.19.2 ([#362](https://github.com/udondan/aws-cloudformation-custom-resource/issues/362)) ([ed3e9c7](https://github.com/udondan/aws-cloudformation-custom-resource/commit/ed3e9c78d17668b91e5d77f8d3da054f1f53892d))
+* **deps:** update dependency aws-cdk to v2.1145.0 ([#364](https://github.com/udondan/aws-cloudformation-custom-resource/issues/364)) ([8678614](https://github.com/udondan/aws-cloudformation-custom-resource/commit/867861402e98d949495217a50121a58836ea08fc))
+* **deps:** update dependency aws-cdk-lib to v2.273.0 ([#365](https://github.com/udondan/aws-cloudformation-custom-resource/issues/365)) ([5083fc1](https://github.com/udondan/aws-cloudformation-custom-resource/commit/5083fc11dc6574cda140648465cbbcfef75c2437))
+* **deps:** update dependency eslint-plugin-prettier to v5.5.7 ([#372](https://github.com/udondan/aws-cloudformation-custom-resource/issues/372)) ([a4f2d0f](https://github.com/udondan/aws-cloudformation-custom-resource/commit/a4f2d0faa893d38ec23e686c19642ce1368eb897))
+* **deps:** update dependency typescript-eslint to v8.71.2 ([#370](https://github.com/udondan/aws-cloudformation-custom-resource/issues/370)) ([264e064](https://github.com/udondan/aws-cloudformation-custom-resource/commit/264e064c55a5e03747e1423c1010be64fa1aa913))
+* **deps:** update lint tooling ([#366](https://github.com/udondan/aws-cloudformation-custom-resource/issues/366)) ([bf2afa2](https://github.com/udondan/aws-cloudformation-custom-resource/commit/bf2afa27f155ece4055f02776f3fdd895ee2740f))
+* **deps:** update udondan/wait-for-turn to v1.4.0 ([#368](https://github.com/udondan/aws-cloudformation-custom-resource/issues/368)) ([93e892a](https://github.com/udondan/aws-cloudformation-custom-resource/commit/93e892aff2b1399a753675f2b9d902a36e76b0a3))
+
 ## [5.1.2](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.1...v5.1.2) (2026-09-30)
 
 
