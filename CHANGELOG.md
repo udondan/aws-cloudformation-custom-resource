@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.1.4](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.3...v5.1.4) (2026-10-25)
+
+
+### Dependencies
+
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1153.0 ([#379](https://github.com/udondan/aws-cloudformation-custom-resource/issues/379)) ([c71f9ed](https://github.com/udondan/aws-cloudformation-custom-resource/commit/c71f9edc53f33f56a8750aa2ba10ecc18aa9a9fc))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1154.0 ([#383](https://github.com/udondan/aws-cloudformation-custom-resource/issues/383)) ([ab88df5](https://github.com/udondan/aws-cloudformation-custom-resource/commit/ab88df51e7112dad06a5ed4b4b4546d0dfde4bb1))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1155.0 ([#384](https://github.com/udondan/aws-cloudformation-custom-resource/issues/384)) ([00d579e](https://github.com/udondan/aws-cloudformation-custom-resource/commit/00d579e8cfd3a88ada3bf6b3f1473bbf409e82ea))
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1156.0 ([#387](https://github.com/udondan/aws-cloudformation-custom-resource/issues/387)) ([5fb70ee](https://github.com/udondan/aws-cloudformation-custom-resource/commit/5fb70ee6b152bf6a90bd0f7646eaa751f3f3cc8d))
+* **deps:** update dependency @swc/core to v1.16.20 ([#385](https://github.com/udondan/aws-cloudformation-custom-resource/issues/385)) ([912da79](https://github.com/udondan/aws-cloudformation-custom-resource/commit/912da79f74641f095755fc7b857d148757826796))
+* **deps:** update dependency aws-cdk to v2.1146.0 ([#381](https://github.com/udondan/aws-cloudformation-custom-resource/issues/381)) ([ce2d9dc](https://github.com/udondan/aws-cloudformation-custom-resource/commit/ce2d9dc1fe3e5b6c5e7fabb51740f1e1b2eb43e6))
+* **deps:** update dependency aws-cdk to v2.1146.1 ([#386](https://github.com/udondan/aws-cloudformation-custom-resource/issues/386)) ([4cf2757](https://github.com/udondan/aws-cloudformation-custom-resource/commit/4cf27576d3a5d606697b24a373702060f55fe7f9))
+* **deps:** update dependency aws-cdk-lib to v2.274.0 ([#382](https://github.com/udondan/aws-cloudformation-custom-resource/issues/382)) ([c22653f](https://github.com/udondan/aws-cloudformation-custom-resource/commit/c22653f1df37792384faeeee237dc0210048d075))
+* **deps:** update dependency eslint to v10.13.0 ([#377](https://github.com/udondan/aws-cloudformation-custom-resource/issues/377)) ([7752a4b](https://github.com/udondan/aws-cloudformation-custom-resource/commit/7752a4b13eaabc722ec3899f805b31d3a4819b09))
+* **deps:** update dependency typescript-eslint to v8.72.0 ([#380](https://github.com/udondan/aws-cloudformation-custom-resource/issues/380)) ([bdf40dd](https://github.com/udondan/aws-cloudformation-custom-resource/commit/bdf40ddb70dde11985b63dd46829b27a2b34af3b))
+
 ## [5.1.3](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.2...v5.1.3) (2026-10-19)
 
 
