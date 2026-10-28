@@ -18,7 +18,7 @@ The Makefile is the entry point. `npm run build` just calls `make build`.
 - `make publish`: run `make package`, then `npm publish` — **unconditionally**. Don't run this locally. It is only invoked by the `publish` job in `.github/workflows/publish.yml`, which is skipped on pull requests and gated behind the `npm` GitHub Environment. That job authenticates via npm trusted publishing (OIDC, `id-token: write`); there is no npm token.
 - `cd test && make diff|deploy|DESTROY`: individual CDK steps
 
-There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make package` on PRs.
+There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make package` on PRs. A separate `actions` job runs actionlint (with shellcheck) over the workflows; both tools are pinned in `mise.toml`.
 
 ## Build output
 
