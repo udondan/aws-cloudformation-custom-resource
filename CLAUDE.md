@@ -18,7 +18,7 @@ The Makefile is the entry point. `npm run build` just calls `make build`.
 - `make publish`: run `make package`, then `npm publish` — **unconditionally**. Don't run this locally. It is only invoked by the `publish` job in `.github/workflows/publish.yml`, which is skipped on pull requests and gated behind the `npm` GitHub Environment. That job authenticates via npm trusted publishing (OIDC, `id-token: write`); there is no npm token.
 - `cd test && make diff|deploy|DESTROY`: individual CDK steps
 
-There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make package` on PRs. A separate `actions` job runs actionlint (with shellcheck) over the workflows; both tools are pinned in `mise.toml`.
+There are no unit tests and no way to run a single test. Validation is lint, `tsc`, and the AWS deploy cycle. CI (`.github/workflows/test.yml`) runs install, `make eslint`, `make test`, then `make package` on PRs. A separate `actions` job runs actionlint (with shellcheck) and zizmor over the workflows; the tools are pinned in `mise.toml`.
 
 ## Build output
 
@@ -43,4 +43,4 @@ A separate npm project with its own `package.json`/lockfile and its own `Makefil
 - Commits and PR titles must follow Conventional Commits (enforced on PR titles by CI). Releases are automated with release-please (`CHANGELOG.md`, `.release-please-manifest.json`), so don't bump versions by hand.
 - ESLint enforces `@typescript-eslint/naming-convention`. AWS/CloudFormation PascalCase keys are wrapped in `/* eslint-disable @typescript-eslint/naming-convention */` blocks. Unused variables must start with `_`. Use template literals instead of string concatenation (`prefer-template`).
 - Dependencies are updated by Renovate. `renovate.json` overrides `ignorePaths` (the `config:recommended` default skips `**/test/**`) and turns off the PR concurrency limit, so the `test/` app gets updates too.
-- Actions maintained by GitHub (`actions/*`) are referenced by major version. All other actions are pinned to an exact version tag.
+- Actions maintained by GitHub (`actions/*`, `github/*`) are referenced by major version tag. All other actions are pinned to a full commit SHA with a `# vX.Y.Z` comment. zizmor (`.github/zizmor.yml`) fails CI otherwise.
