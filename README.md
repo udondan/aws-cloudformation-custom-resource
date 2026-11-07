@@ -3,6 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/aws-cloudformation-custom-resource)][npm]
 [![npm](https://img.shields.io/npm/dt/aws-cloudformation-custom-resource)][npm]
 [![codecov](https://codecov.io/gh/udondan/aws-cloudformation-custom-resource/graph/badge.svg)][codecov]
+[![Maintainability](https://qlty.sh/gh/udondan/projects/aws-cloudformation-custom-resource/maintainability.svg)][qlty]
 [![License](https://img.shields.io/github/license/udondan/aws-cloudformation-custom-resource)][license]
 
 Helper for managing custom AWS CloudFormation resources in a Lambda function.
@@ -137,3 +138,4 @@ resource.setLogger(logger);
 [npm]: https://www.npmjs.com/package/aws-cloudformation-custom-resource
 [codecov]: https://codecov.io/gh/udondan/aws-cloudformation-custom-resource
 [license]: https://github.com/udondan/aws-cloudformation-custom-resource/blob/main/LICENSE
+[qlty]: https://qlty.sh/gh/udondan/projects/aws-cloudformation-custom-resource

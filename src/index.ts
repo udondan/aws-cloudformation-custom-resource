@@ -80,13 +80,6 @@ export type Event<ResourceProperties = DefaultResourceProperties> = Omit<
 };
 
 /**
- * A response value returned to CloudFormation.
- */
-// As Cloudformation will transform any value to a string, we're upfront explicit and only allow strings to avoid surprises
-// Technically it would be possible though, to accept booleans and numbers as well.
-type ResponseValue = string;
-
-/**
  * Function signature
  */
 export type HandlerFunction<ResourceProperties extends object> = (
@@ -103,17 +96,17 @@ export class CustomResource<
   /**
    * Stores function executed when resource creation is requested
    */
-  private createFunction: HandlerFunction<ResourceProperties>;
+  private readonly createFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource update is requested
    */
-  private updateFunction: HandlerFunction<ResourceProperties>;
+  private readonly updateFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * Stores function executed when resource deletion is requested
    */
-  private deleteFunction: HandlerFunction<ResourceProperties>;
+  private readonly deleteFunction: HandlerFunction<ResourceProperties>;
 
   /**
    * The event passed to the Lambda handler
@@ -140,7 +133,7 @@ export class CustomResource<
   /**
    * Stores values returned to CloudFormation
    */
-  private responseData: Record<string, ResponseValue> = {};
+  private readonly responseData: Record<string, string> = {};
 
   /**
    * Stores values physical ID of the resource
@@ -251,7 +244,7 @@ export class CustomResource<
   /**
    * Proxy handler for ResourceProperties
    */
-  private propertiesProxyHandler: ProxyHandler<
+  private readonly propertiesProxyHandler: ProxyHandler<
     CustomResourceProperties<ResourceProperties>
   > = {
     get: (
@@ -303,8 +296,11 @@ export class CustomResource<
 
   /**
    * Adds values to the response returned to CloudFormation
+   *
+   * Only strings are accepted: CloudFormation turns every value into a string
+   * anyway, so booleans and numbers would only lead to surprises.
    */
-  addResponseValue(key: string, value: ResponseValue) {
+  addResponseValue(key: string, value: string) {
     this.responseData[key] = value;
   }
 

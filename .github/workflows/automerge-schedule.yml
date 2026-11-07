@@ -3,7 +3,7 @@ name: Schedule Release Automerge
 
 on:
   schedule:
-    - cron: '0 9 * * 1' # Every Monday at 9am UTC
+    - cron: "0 9 * * 1" # Every Monday at 9am UTC
   workflow_dispatch:
 
 # Uses OVERRIDE_TOKEN, not the workflow token.

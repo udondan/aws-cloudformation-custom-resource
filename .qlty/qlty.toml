@@ -1,0 +1,98 @@
+# Configuration for Qlty CLI and Qlty Cloud.
+# Guide: https://qlty.sh/d/config, full reference: https://qlty.sh/d/qlty-toml
+config_version = "0"
+
+exclude_patterns = [
+  "*_min.*",
+  "*-min.*",
+  "*.min.*",
+  "**/.yarn/**",
+  "**/*.d.ts",
+  "**/assets/**",
+  "**/bower_components/**",
+  "**/build/**",
+  "**/cache/**",
+  "**/config/**",
+  "**/db/**",
+  "**/deps/**",
+  "**/dist/**",
+  "**/extern/**",
+  "**/external/**",
+  "**/generated/**",
+  "**/Godeps/**",
+  "**/gradlew/**",
+  "**/mvnw/**",
+  "**/node_modules/**",
+  "**/protos/**",
+  "**/seed/**",
+  "**/target/**",
+  "**/templates/**",
+  "**/testdata/**",
+  "**/vendor/**",
+  "**/.claude/**",
+]
+
+test_patterns = [
+  "**/test/**",
+  "**/spec/**",
+  "**/*.test.*",
+  "**/*.spec.*",
+  "**/*_test.*",
+  "**/*_spec.*",
+  "**/test_*.*",
+  "**/spec_*.*",
+]
+
+[smells]
+mode = "block"
+
+[[source]]
+name = "default"
+default = true
+
+# Vulnerable dependencies in package-lock.json and test/package-lock.json
+[[plugin]]
+name = "osv-scanner"
+
+[[plugin]]
+name = "trivy"
+
+# Committed secrets
+[[plugin]]
+name = "gitleaks"
+
+[[plugin]]
+name = "trufflehog"
+
+# Bug and security rules for TypeScript, on top of eslint
+[[plugin]]
+name = "radarlint-js"
+
+# handle() starts from a setTimeout in the constructor on purpose: callers can
+# still run setLogger(), setNoEcho() etc. right after constructing the resource.
+[[triage]]
+match.rules = ["radarlint-js:typescript:S7059"]
+match.file_patterns = ["src/index.ts"]
+set.ignored = true
+
+# The tests reject with a string and a plain object on purpose, to cover the
+# error formatting for non-Error rejections.
+[[triage]]
+match.rules = ["radarlint-js:typescript:S6671"]
+match.file_patterns = ["src/index.test.ts"]
+set.ignored = true
+
+# CDK constructs register themselves with their scope, so the stack is never
+# assigned.
+[[triage]]
+match.rules = ["radarlint-js:typescript:S1848"]
+match.file_patterns = ["test/bin/app.ts"]
+set.ignored = true
+
+# minimatch is a bundled dependency of aws-cdk-lib, so an npm override can't
+# replace it. It only runs during CDK synth of the test app and is not part of
+# the published package.
+[[triage]]
+match.rules = ["osv-scanner:CVE-2026-118764", "trivy:CVE-2026-118764"]
+match.file_patterns = ["test/package-lock.json"]
+set.ignored = true
