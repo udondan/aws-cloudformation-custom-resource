@@ -6,7 +6,7 @@ ERROR_COLOR=\033[0;31m
 
 PARAMETER_NAME=CustomResourceTestParameter
 
-.PHONY: test package publish
+.PHONY: test unit-test package publish
 
 install:
 	@echo -e "$(TARGET_COLOR)Running install$(NO_COLOR)"
@@ -17,6 +17,21 @@ build: install
 	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
 	@find . -type f \( -name "*.js" -o -name "*.d.ts" \) ! -path "./node_modules/*" ! -path "./test/node_modules/*" -exec rm -f {} +
 	@npx tsc
+
+# Runs on the compiled JS. The inline source maps map the coverage back to the .ts sources.
+# Fails if any line, branch or function of src/index.ts is not covered.
+unit-test:
+	@echo -e "$(TARGET_COLOR)Running unit-test$(NO_COLOR)"
+	@npx tsc -p tsconfig.unit.json
+	@node --test \
+		--enable-source-maps \
+		--experimental-test-coverage \
+		--test-coverage-lines=100 \
+		--test-coverage-branches=100 \
+		--test-coverage-functions=100 \
+		--test-reporter=spec --test-reporter-destination=stdout \
+		--test-reporter=lcov --test-reporter-destination=lcov.info \
+		src/index.test.js
 
 test:
 	@echo -e "$(TARGET_COLOR)Running test$(NO_COLOR)"

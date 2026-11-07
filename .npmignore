@@ -5,3 +5,5 @@
 !*.d.ts
 
 test
+*.test.js
+*.test.d.ts
