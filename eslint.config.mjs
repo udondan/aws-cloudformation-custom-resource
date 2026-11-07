@@ -37,5 +37,12 @@ export default tseslint.config(
       '@typescript-eslint/naming-convention': 'error',
     },
   },
+  {
+    // describe() and it() from node:test return promises that the runner awaits.
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'off',
+    },
+  },
   prettierRecommended,
 );

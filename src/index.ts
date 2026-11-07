@@ -430,11 +430,7 @@ export class CustomResource<
   private timeout() {
     const handler = () => {
       this.logger.error('Timeout FAILURE!');
-      new Promise(() => this.sendResponse('FAILED', 'Function timed out'))
-        .then(() => this.callback?.(new Error('Function timed out')))
-        .catch((err: unknown) => {
-          this.handleError(err);
-        });
+      this.sendResponse('FAILED', 'Function timed out');
     };
     this.timeoutTimer = setTimeout(
       handler,
