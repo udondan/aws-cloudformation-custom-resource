@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.1.6](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.5...v5.1.6) (2026-11-07)
+
+
+### Dependencies
+
+* **deps:** update dependency @aws-sdk/client-ssm to v3.1161.0 ([#412](https://github.com/udondan/aws-cloudformation-custom-resource/issues/412)) ([d4d7f47](https://github.com/udondan/aws-cloudformation-custom-resource/commit/d4d7f474869e3fcb6dbd995c76425239da4e0f85))
+* **deps:** update dependency @swc/core to v1.16.21 ([#414](https://github.com/udondan/aws-cloudformation-custom-resource/issues/414)) ([909a2b6](https://github.com/udondan/aws-cloudformation-custom-resource/commit/909a2b609538965bb6c35f8fbe682e6f5f0dfc02))
+* **deps:** update dependency @swc/helpers to v0.5.24 ([#420](https://github.com/udondan/aws-cloudformation-custom-resource/issues/420)) ([7ff27b2](https://github.com/udondan/aws-cloudformation-custom-resource/commit/7ff27b2e7fa4a4dc51fd5cd1740020cd8116c61b))
+* **deps:** update dependency aws-cdk to v2.1147.0 ([#413](https://github.com/udondan/aws-cloudformation-custom-resource/issues/413)) ([e0f9312](https://github.com/udondan/aws-cloudformation-custom-resource/commit/e0f93122a2459c774d602bb133edd82954a70970))
+* **deps:** update dependency eslint to v10.14.0 ([#410](https://github.com/udondan/aws-cloudformation-custom-resource/issues/410)) ([d81549d](https://github.com/udondan/aws-cloudformation-custom-resource/commit/d81549df7d552fe4aa0f542d2b06f6951c19456d))
+* **deps:** update dependency zizmor to v1.32.0 ([#419](https://github.com/udondan/aws-cloudformation-custom-resource/issues/419)) ([d3b7d7c](https://github.com/udondan/aws-cloudformation-custom-resource/commit/d3b7d7c2d84ca27c78ad4492d88fdf6673382f91))
+* **deps:** update jdx/mise-action action to v5.2.5 ([#417](https://github.com/udondan/aws-cloudformation-custom-resource/issues/417)) ([1da9485](https://github.com/udondan/aws-cloudformation-custom-resource/commit/1da9485c47503058730997d64d34bc9f95b8d9d0))
+* **deps:** update jdx/mise-action action to v5.2.6 ([#418](https://github.com/udondan/aws-cloudformation-custom-resource/issues/418)) ([8010642](https://github.com/udondan/aws-cloudformation-custom-resource/commit/801064294292f2c2ed76b14919643dc1594bd346))
+
 ## [5.1.5](https://github.com/udondan/aws-cloudformation-custom-resource/compare/v5.1.4...v5.1.5) (2026-11-02)
 
 
