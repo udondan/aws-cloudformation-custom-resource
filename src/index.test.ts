@@ -59,6 +59,10 @@ function makeContext(remainingTime = 60_000): Context {
   };
 }
 
+// A handler that never settles, so the timeout has to answer.
+const neverSettles: HandlerFunction<Properties> = () =>
+  new Promise<void>(() => undefined);
+
 const silentLogger: Logger = {
   log: () => undefined,
   info: () => undefined,
@@ -303,7 +307,7 @@ describe('CustomResource', () => {
       const sent = mockHttps();
       const resource = create(
         makeEvent(),
-        { create: () => new Promise<void>(() => undefined) },
+        { create: neverSettles },
         makeContext(1010),
       );
 
