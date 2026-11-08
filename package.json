@@ -29,7 +29,7 @@
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@swc/core": "1.16.21",
+    "@swc/core": "1.16.22",
     "@swc/helpers": "0.5.24",
     "@types/node": "26.6.6",
     "eslint": "10.14.0",
