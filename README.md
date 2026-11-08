@@ -1,4 +1,8 @@
-# aws-cloudformation-custom-resource
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/udondan/aws-cloudformation-custom-resource/main/.github/assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/udondan/aws-cloudformation-custom-resource/main/.github/assets/banner-light.svg">
+  <img alt="aws-cloudformation-custom-resource" src="https://raw.githubusercontent.com/udondan/aws-cloudformation-custom-resource/main/.github/assets/banner-light.svg">
+</picture>
 
 [![npm version](https://img.shields.io/npm/v/aws-cloudformation-custom-resource)][npm]
 [![npm](https://img.shields.io/npm/dt/aws-cloudformation-custom-resource)][npm]
