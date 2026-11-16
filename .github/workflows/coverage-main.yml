@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install dependencies
-        run: make install
+        run: make install-root
 
       - name: Unit tests
         run: make unit-test

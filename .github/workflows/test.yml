@@ -105,7 +105,7 @@ jobs:
           fetch-depth: 1
 
       - name: Install dependencies
-        run: make install
+        run: make install-root
 
       # Fails below 100 % line, branch or function coverage.
       - name: Unit tests

@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The Makefile is the entry point. `bun run build` just calls `make build`. Bun is the package manager (versions pinned in `mise.toml` and the workflows); Node still runs the unit tests, the CDK CLI and the Lambda, and npm is only used for `npm pack`/`npm publish`.
 
 - `make install`: `bun install --frozen-lockfile`. The root and the `test/` workspace share one `bun.lock`
+- `make install-root`: install only the root package's dependencies (`--filter`), without the CDK app. Used by the `unit`, coverage and publish jobs; `make package` depends on it
 - `make build`: install, delete all emitted `*.js`/`*.d.ts` outside `node_modules`, then run `bunx tsc`
 - `make eslint`: run `bunx eslint .` (type-checked rules plus Prettier, see `eslint.config.mjs`)
 - `make test`: **integration test against real AWS** (needs credentials, region `us-east-1`). Locally it uses whatever credentials your environment provides; in CI they come from GitHub OIDC via the `AWS_IAM_ROLE` and `AWS_REGION` secrets. It installs nothing itself, so run `make install` first. It builds the CDK app in `test/`, deploys it twice, checks that the SSM parameter `CustomResourceTestParameter` is at version 2 (the second deploy must run the Update path), then destroys the stack.

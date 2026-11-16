@@ -6,11 +6,17 @@ ERROR_COLOR=\033[0;31m
 
 PARAMETER_NAME=CustomResourceTestParameter
 
-.PHONY: test unit-test package publish
+.PHONY: install install-root test unit-test package publish
 
 install:
 	@echo -e "$(TARGET_COLOR)Running install$(NO_COLOR)"
 	@bun install --frozen-lockfile
+
+# Only the root package's dependencies, without the CDK app in test/.
+# Enough for unit-test and package, and about a fifth of the full download.
+install-root:
+	@echo -e "$(TARGET_COLOR)Running install-root$(NO_COLOR)"
+	@bun install --frozen-lockfile --filter aws-cloudformation-custom-resource
 
 build: install
 	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
@@ -47,7 +53,7 @@ test:
 	fi && \
 	$(MAKE) DESTROY
 
-package: install
+package: install-root
 	@echo -e "$(TARGET_COLOR)Running package$(NO_COLOR)"
 	@bunx tsc -p tsconfig.publish.json
 	@npm pack --dry-run 2>&1 | tee publish_output.txt
