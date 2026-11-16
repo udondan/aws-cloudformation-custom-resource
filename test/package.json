@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "3.1168.0",
-    "aws-cdk-lib": "2.276.0",
+    "aws-cdk-lib": "2.277.0",
     "aws-cloudformation-custom-resource": "workspace:*",
     "constructs": "10.8.1"
   }
