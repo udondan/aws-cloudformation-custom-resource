@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-The Makefile is the entry point. `bun run build` just calls `make build`. Bun is the package manager (versions pinned in `mise.toml` and the workflows); Node still runs the unit tests, the CDK CLI and the Lambda, and npm is only used for `npm pack`/`npm publish`.
+The Makefile is the entry point. `bun run build` just calls `make build`. Bun is the package manager (versions pinned only in `mise.toml`; the workflows install them with `jdx/mise-action`); Node still runs the unit tests, the CDK CLI and the Lambda, and npm is only used for `npm pack`/`npm publish`.
 
 - `make install`: `bun install --frozen-lockfile`. The root and the `test/` workspace share one `bun.lock`
 - `make install-root`: install only the root package's dependencies (`--filter`), without the CDK app. Used by the `unit`, coverage and publish jobs; `make package` depends on it
