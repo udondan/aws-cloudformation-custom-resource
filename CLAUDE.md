@@ -8,12 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-The Makefile is the entry point. `npm run build` just calls `make build`.
+The Makefile is the entry point. `bun run build` just calls `make build`. Bun is the package manager (versions pinned in `mise.toml` and the workflows); Node still runs the unit tests, the CDK CLI and the Lambda, and npm is only used for `npm pack`/`npm publish`.
 
-- `make install`: `npm clean-install` using the local `.npm` cache
-- `make build`: install, delete all emitted `*.js`/`*.d.ts` outside `node_modules`, then run `npx tsc`
-- `make eslint`: run `npx eslint .` (type-checked rules plus Prettier, see `eslint.config.mjs`)
-- `make test`: **integration test against real AWS** (needs credentials, region `us-east-1`). Locally it uses whatever credentials your environment provides; in CI they come from GitHub OIDC via the `AWS_IAM_ROLE` and `AWS_REGION` secrets. It installs nothing itself, so run `make install` and `cd test && make install` first. It builds the CDK app in `test/`, deploys it twice, checks that the SSM parameter `CustomResourceTestParameter` is at version 2 (the second deploy must run the Update path), then destroys the stack.
+- `make install`: `bun install --frozen-lockfile`. The root and the `test/` workspace share one `bun.lock`
+- `make build`: install, delete all emitted `*.js`/`*.d.ts` outside `node_modules`, then run `bunx tsc`
+- `make eslint`: run `bunx eslint .` (type-checked rules plus Prettier, see `eslint.config.mjs`)
+- `make test`: **integration test against real AWS** (needs credentials, region `us-east-1`). Locally it uses whatever credentials your environment provides; in CI they come from GitHub OIDC via the `AWS_IAM_ROLE` and `AWS_REGION` secrets. It installs nothing itself, so run `make install` first. It builds the CDK app in `test/`, deploys it twice, checks that the SSM parameter `CustomResourceTestParameter` is at version 2 (the second deploy must run the Update path), then destroys the stack.
 - `make unit-test`: compile `src/` with `tsconfig.unit.json` (only `src/**/*.ts`, so the `test/` app's dependencies aren't needed), then run `src/index.test.js` with `node:test` and built-in coverage. The inline source maps map the coverage back to `src/index.ts`. It fails below 100 % line, branch or function coverage and writes `lcov.info`. To run a single test, add `--test-name-pattern='<name>'` to the `node --test` call.
 - `make package`: compile with `tsconfig.publish.json`, run `npm pack --dry-run`, and assert the package contains exactly 5 files, including `src/index.js` and `src/index.d.ts`. Publishes nothing, so it is safe to run locally.
 - `make publish`: run `make package`, then `npm publish` — **unconditionally**. Don't run this locally. It is only invoked by the `publish` job in `.github/workflows/publish.yml`, which is skipped on pull requests and gated behind the `npm` GitHub Environment. That job authenticates via npm trusted publishing (OIDC, `id-token: write`); there is no npm token.
@@ -37,7 +37,7 @@ Unit tests live in `src/index.test.ts`. They mock `https.request` and `console` 
 
 ## Test app (`test/`)
 
-A separate npm project with its own `package.json`/lockfile and its own `Makefile`. It depends on the library through `"aws-cloudformation-custom-resource": "file:.."`. `test/lambda/index.ts` is a full usage example (an SSM parameter custom resource with tags, bundled by `NodejsFunction`/esbuild). `test/lib/parameter.ts` is the CDK construct that wires it up. The README points to this directory as the reference example, so keep it in sync with API changes.
+A Bun workspace (root `package.json` `workspaces`) with its own `package.json` and `Makefile`. There is no separate lockfile, the root `bun.lock` covers it. It depends on the library through `"aws-cloudformation-custom-resource": "workspace:*"`, a symlink to the repo root, so it always uses the freshly built `src/index.js`. `cdk.json` runs the CDK app directly with `bun bin/app.ts`, no ts-node. `test/lambda/index.ts` is a full usage example (an SSM parameter custom resource with tags, bundled by `NodejsFunction`/esbuild). `test/lib/parameter.ts` is the CDK construct that wires it up. The README points to this directory as the reference example, so keep it in sync with API changes.
 
 ## Conventions
 
