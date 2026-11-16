@@ -16,6 +16,7 @@ on:
 jobs:
   # Only one run at a time may use the AWS test account.
   boarding-gate:
+    name: Queue
     permissions:
       actions: read
       contents: write # lock refs under refs/boarding-gate/
