@@ -29,13 +29,64 @@ jobs:
     secrets:
       update-token: ${{ secrets.OVERRIDE_TOKEN }}
 
+  # Decides whether the AWS test is needed. Only changes that can't affect the
+  # deployment (docs, repo config, other workflows) skip it. Any other file,
+  # including unknown ones, runs it. Pushes are compared with the previous
+  # commit; workflow_dispatch always runs it.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # compare commits
+      pull-requests: read # list the files of the pull request
+    outputs:
+      aws: ${{ steps.check.outputs.aws }}
+    steps:
+      - name: Check changed files
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT" == pull_request ]]; then
+            files=$(gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')
+          elif [[ "$EVENT" == push && -n "$BEFORE" && ! "$BEFORE" =~ ^0+$ ]]; then
+            compare=$(gh api "repos/$REPO/compare/$BEFORE...$AFTER")
+            # The compare API lists at most 300 files.
+            if [[ $(jq '.files | length' <<<"$compare") -ge 300 ]]; then
+              echo "aws=true" >>"$GITHUB_OUTPUT"
+              exit 0
+            fi
+            files=$(jq -r '.files[] | .filename, (.previous_filename // empty)' <<<"$compare")
+          else
+            echo "aws=true" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          aws=false
+          while IFS= read -r file; do
+            case "$file" in
+              "") continue ;;
+              .github/workflows/test.yml) aws=true ;;
+              *.md | LICENSE | .gitignore | codecov.yml | renovate.json | release-please-config.json | .release-please-manifest.json | .qlty/* | .github/*) continue ;;
+              *) aws=true ;;
+            esac
+            echo "Needs the AWS test: $file"
+            break
+          done <<<"$files"
+          echo "aws=$aws" >>"$GITHUB_OUTPUT"
+
   test:
     name: Test
-    needs: [boarding-gate, unit]
+    needs: [boarding-gate, unit, changes]
     # A skipped job counts as passed for required checks. Run the job even if
     # boarding-gate failed and fail it in the first step. Skip it if the unit
-    # tests failed: the required job still fails on the unit result.
-    if: ${{ !cancelled() && needs.unit.result == 'success' }}
+    # tests failed (the required job still fails on the unit result) or if
+    # nothing changed that can affect the deployment.
+    if: ${{ !cancelled() && needs.unit.result == 'success' && needs.changes.outputs.aws == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # OIDC token for assuming the AWS role
@@ -223,7 +274,7 @@ jobs:
 
   # The only test check the ruleset requires, whatever jobs are added later.
   required:
-    needs: [boarding-gate, test, unit, coverage, actions, qlty]
+    needs: [boarding-gate, changes, test, unit, coverage, actions, qlty]
     if: always()
     runs-on: ubuntu-latest
     steps:
