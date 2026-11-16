@@ -31,10 +31,11 @@ jobs:
 
   test:
     name: Test
-    needs: boarding-gate
+    needs: [boarding-gate, unit]
     # A skipped job counts as passed for required checks. Run the job even if
-    # boarding-gate failed and fail it in the first step.
-    if: ${{ !cancelled() }}
+    # boarding-gate failed and fail it in the first step. Skip it if the unit
+    # tests failed: the required job still fails on the unit result.
+    if: ${{ !cancelled() && needs.unit.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # OIDC token for assuming the AWS role
@@ -81,13 +82,19 @@ jobs:
       - name: Test building package
         run: make package
 
-  # Unit tests with coverage. Doesn't wait for the AWS test account.
+  # Unit tests with coverage. The AWS test only runs if they pass.
   unit:
+    needs: boarding-gate
+    # Fail instead of skip if boarding-gate failed, see the test job.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read # checkout
       id-token: write # Codecov upload via OIDC
     steps:
+      - name: Check turn
+        if: needs.boarding-gate.result != 'success'
+        run: exit 1
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -155,10 +162,15 @@ jobs:
           done
           echo "::warning::Codecov didn't report within 5 minutes, coverage is not checked."
 
-  # Doesn't wait for the AWS test account.
   actions:
+    needs: boarding-gate
+    # Fail instead of skip if boarding-gate failed, see the test job.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check turn
+        if: needs.boarding-gate.result != 'success'
+        run: exit 1
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -179,11 +191,17 @@ jobs:
   # Code smells (complexity, duplication, nesting) and qlty plugins. Git-aware:
   # only smells introduced by the PR compared to main fail the job.
   qlty:
+    needs: boarding-gate
+    # Fail instead of skip if boarding-gate failed, see the test job.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
     steps:
+      - name: Check turn
+        if: needs.boarding-gate.result != 'success'
+        run: exit 1
       - name: Checkout code
         uses: actions/checkout@v7
         with:
