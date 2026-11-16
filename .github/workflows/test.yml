@@ -29,9 +29,9 @@ jobs:
     secrets:
       update-token: ${{ secrets.OVERRIDE_TOKEN }}
 
-  # The AWS test only runs if something changed that can affect the deployment.
+  # Unit tests and the AWS test only run if code or build config changed.
   # Skipped outside of pull requests, so pushes to main and workflow_dispatch
-  # always run it.
+  # always run them.
   changes:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -39,13 +39,13 @@ jobs:
       contents: read
       pull-requests: read # paths-filter lists the PR's files via the API
     outputs:
-      aws: ${{ steps.filter.outputs.aws }}
+      code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
-            aws:
+            code:
               - src/**
               - test/**
               - package.json
@@ -60,12 +60,12 @@ jobs:
 
   test:
     name: Test
-    needs: [boarding-gate, unit, changes]
+    needs: [boarding-gate, unit]
     # A skipped job counts as passed for required checks. Run the job even if
-    # boarding-gate failed and fail it in the first step. Skip it if the unit
-    # tests failed (the required job still fails on the unit result) or if
-    # nothing changed that can affect the deployment.
-    if: ${{ !cancelled() && needs.unit.result == 'success' && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.aws == 'true')) }}
+    # boarding-gate failed and fail it in the first step. Only run it if the
+    # unit tests passed: they are skipped if no code changed, and if they
+    # failed, the required job fails on their result.
+    if: ${{ !cancelled() && needs.unit.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # OIDC token for assuming the AWS role
@@ -109,9 +109,10 @@ jobs:
 
   # Unit tests with coverage. The AWS test only runs if they pass.
   unit:
-    needs: boarding-gate
-    # Fail instead of skip if boarding-gate failed, see the test job.
-    if: ${{ !cancelled() }}
+    needs: [boarding-gate, changes]
+    # Skip if no code changed. Otherwise fail instead of skip if boarding-gate
+    # failed, see the test job.
+    if: ${{ !cancelled() && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.code == 'true')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read # checkout
