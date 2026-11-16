@@ -31,16 +31,22 @@ jobs:
 
   # Unit tests and the AWS test only run if code or build config changed.
   # Skipped outside of pull requests, so pushes to main and workflow_dispatch
-  # always run them.
+  # always run them. Waits for boarding-gate like everything else: while
+  # another run holds the turn, this one likely needs a rebase anyway.
   changes:
+    needs: boarding-gate
+    # Fail instead of skip if boarding-gate failed, see the test job.
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: read # paths-filter lists the PR's files via the API
     outputs:
       code: ${{ steps.filter.outputs.code }}
     steps:
+      - name: Check turn
+        if: needs.boarding-gate.result != 'success'
+        run: exit 1
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
