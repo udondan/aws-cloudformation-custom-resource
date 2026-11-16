@@ -27,16 +27,16 @@
     "url": "https://github.com/udondan/aws-cloudformation-custom-resource/issues"
   },
   "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
+  "workspaces": [
+    "test"
+  ],
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@swc/core": "1.16.22",
-    "@swc/helpers": "0.5.24",
     "@types/node": "26.6.6",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.7",
     "prettier": "3.10.1",
-    "regenerator-runtime": "0.14.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.2"
   },

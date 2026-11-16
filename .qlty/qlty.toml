@@ -50,7 +50,6 @@ mode = "block"
 name = "default"
 default = true
 
-# Vulnerable dependencies in package-lock.json and test/package-lock.json
 [[plugin]]
 name = "osv-scanner"
 
@@ -87,12 +86,4 @@ set.ignored = true
 [[triage]]
 match.rules = ["radarlint-js:typescript:S1848"]
 match.file_patterns = ["test/bin/app.ts"]
-set.ignored = true
-
-# minimatch is a bundled dependency of aws-cdk-lib, so an npm override can't
-# replace it. It only runs during CDK synth of the test app and is not part of
-# the published package.
-[[triage]]
-match.rules = ["osv-scanner:CVE-2026-118764", "trivy:CVE-2026-118764"]
-match.file_patterns = ["test/package-lock.json"]
 set.ignored = true

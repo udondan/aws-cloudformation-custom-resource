@@ -6,23 +6,28 @@ ERROR_COLOR=\033[0;31m
 
 PARAMETER_NAME=CustomResourceTestParameter
 
-.PHONY: test unit-test package publish
+.PHONY: install install-root test unit-test package publish
 
 install:
 	@echo -e "$(TARGET_COLOR)Running install$(NO_COLOR)"
-	@npm clean-install --prefer-offline --cache .npm
-	@npm list
+	@bun install --frozen-lockfile
+
+# Only the root package's dependencies, without the CDK app in test/.
+# Enough for unit-test and package, and about a fifth of the full download.
+install-root:
+	@echo -e "$(TARGET_COLOR)Running install-root$(NO_COLOR)"
+	@bun install --frozen-lockfile --filter aws-cloudformation-custom-resource
 
 build: install
 	@echo -e "$(TARGET_COLOR)Running build$(NO_COLOR)"
 	@find . -type f \( -name "*.js" -o -name "*.d.ts" \) ! -path "./node_modules/*" ! -path "./test/node_modules/*" -exec rm -f {} +
-	@npx tsc
+	@bunx tsc
 
 # Runs on the compiled JS. The inline source maps map the coverage back to the .ts sources.
 # Fails if any line, branch or function of src/index.ts is not covered.
 unit-test:
 	@echo -e "$(TARGET_COLOR)Running unit-test$(NO_COLOR)"
-	@npx tsc -p tsconfig.unit.json
+	@bunx tsc -p tsconfig.unit.json
 	@node --test \
 		--enable-source-maps \
 		--experimental-test-coverage \
@@ -48,9 +53,9 @@ test:
 	fi && \
 	$(MAKE) DESTROY
 
-package: install
+package: install-root
 	@echo -e "$(TARGET_COLOR)Running package$(NO_COLOR)"
-	@npx tsc -p tsconfig.publish.json
+	@bunx tsc -p tsconfig.publish.json
 	@npm pack --dry-run 2>&1 | tee publish_output.txt
 	@if ! grep -q "src/index.js" publish_output.txt; then \
 		echo "❌ src/index.js is NOT included in the package"; \
@@ -72,6 +77,6 @@ publish: package
 	@npm publish
 
 eslint:
-	@echo -e "$(TARGET_COLOR)Running eslint $$(npx eslint --version)$(NO_COLOR)"
-	@npx eslint .; \
+	@echo -e "$(TARGET_COLOR)Running eslint $$(bunx eslint --version)$(NO_COLOR)"
+	@bunx eslint .; \
 	echo "Passed"
