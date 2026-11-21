@@ -1,0 +1,21 @@
+{
+  "name": "test",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "26.6.6",
+    "aws-cdk": "2.1148.1",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "3.1171.0",
+    "aws-cdk-lib": "2.277.0",
+    "aws-cloudformation-custom-resource": "workspace:*",
+    "constructs": "10.8.1"
+  }
+}
