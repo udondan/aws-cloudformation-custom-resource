@@ -11,6 +11,9 @@
 [![Maintainability](https://qlty.sh/gh/udondan/projects/aws-cloudformation-custom-resource/maintainability.svg)][qlty]
 [![License](https://img.shields.io/github/license/udondan/aws-cloudformation-custom-resource)][license]
 
+> [!NOTE]
+> Unofficial community project. Not affiliated with, endorsed or authorized by Amazon Web Services (AWS).
+
 Helper for managing custom AWS CloudFormation resources in a Lambda function.
 
 ## Usage
@@ -139,6 +142,10 @@ const resource = new CustomResource(
 
 resource.setLogger(logger);
 ```
+
+## Disclaimer
+
+This is an unofficial, independent open-source project and is not affiliated with, funded or endorsed by Amazon Web Services, Inc. or its affiliates. AWS, AWS CloudFormation, AWS Lambda and the names of other AWS services are trademarks of Amazon.com, Inc. or its affiliates. The names are used only to describe compatibility. Use at your own risk.
 
 [npm]: https://www.npmjs.com/package/aws-cloudformation-custom-resource
 [ci]: https://github.com/udondan/aws-cloudformation-custom-resource/actions/workflows/test.yml
