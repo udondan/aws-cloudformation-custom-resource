@@ -13,7 +13,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "3.1172.0",
+    "@aws-sdk/client-ssm": "3.1173.0",
     "aws-cdk-lib": "2.277.0",
     "aws-cloudformation-custom-resource": "workspace:*",
     "constructs": "10.8.1"
