@@ -2,10 +2,12 @@ import {
   aws_iam,
   aws_lambda,
   aws_lambda_nodejs,
+  aws_logs,
   CustomResource,
   Duration,
   ITaggable,
   Lazy,
+  RemovalPolicy,
   ResourceProps,
   Stack,
   TagManager,
@@ -54,7 +56,10 @@ export class Parameter extends Construct implements ITaggable {
       functionName: lambdaName,
       runtime: aws_lambda.Runtime.NODEJS_24_X,
       description: 'Testing custom CFN resources',
-      logRetention: 3,
+      logGroup: new aws_logs.LogGroup(this, 'LogGroup', {
+        retention: aws_logs.RetentionDays.THREE_DAYS,
+        removalPolicy: RemovalPolicy.DESTROY,
+      }),
       timeout: Duration.seconds(30),
     });
     this.lambda.addToRolePolicy(
