@@ -1,0 +1,46 @@
+{
+  "name": "aws-cloudformation-custom-resource",
+  "version": "5.1.5",
+  "description": "Helper for managing custom AWS CloudFormation resources in a Lambda function",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "build": "make build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udondan/aws-cloudformation-custom-resource.git"
+  },
+  "keywords": [
+    "aws",
+    "cloudformation",
+    "lambda",
+    "resource",
+    "cloudformation-custom-resource"
+  ],
+  "author": {
+    "name": "Daniel Schroeder",
+    "url": "https://www.udondan.com/"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/udondan/aws-cloudformation-custom-resource/issues"
+  },
+  "homepage": "https://github.com/udondan/aws-cloudformation-custom-resource#readme",
+  "workspaces": [
+    "test"
+  ],
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.10",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.7",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.74.0"
+  },
+  "overrides": {
+    "minimatch": "^11.0.3"
+  }
+}
